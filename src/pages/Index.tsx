@@ -12,7 +12,8 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img src="/lovable-uploads/554263cb-c020-41c0-97f8-9592f3dd2fd2.png" alt="CSU Logo" className="h-10 w-10" />
-              <h1 className="text-2xl font-bold">CSU CE Alumni Network</h1>
+              <img src="/lovable-uploads/c101f9cb-9ca8-4f75-952b-fc90fd772dc8.png" alt="CpE Logo" className="h-10 w-10" />
+              <h1 className="text-2xl font-bold">CpE Alumni Network</h1>
             </div>
             <nav className="flex items-center gap-4">
               <Button variant="ghost">Jobs</Button>
@@ -143,7 +144,8 @@ const Index = () => {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <img src="/lovable-uploads/554263cb-c020-41c0-97f8-9592f3dd2fd2.png" alt="CSU Logo" className="h-8 w-8" />
-                <span className="font-bold">CSU CE Alumni Network</span>
+                <img src="/lovable-uploads/c101f9cb-9ca8-4f75-952b-fc90fd772dc8.png" alt="CpE Logo" className="h-8 w-8" />
+                <span className="font-bold">CpE Alumni Network</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Connecting Computer Engineering graduates with exciting career opportunities.
