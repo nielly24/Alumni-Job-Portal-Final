@@ -33,7 +33,7 @@ const Index = () => {
             <span className="block text-primary">Job Portal</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Connect with fellow CE alumni, discover career opportunities, and build your professional network in tech industry.
+            Connect with fellow CpE alumni, discover career opportunities, and build your professional network in tech industry.
           </p>
           <div className="flex justify-center gap-4">
             <Button size="lg" className="px-8">
