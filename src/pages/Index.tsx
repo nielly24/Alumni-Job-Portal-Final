@@ -2,8 +2,49 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Building, Clock, Users, Briefcase, GraduationCap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignInClick = () => {
+    navigate("/auth");
+  };
+
+  const handleJobsClick = () => {
+    toast({
+      title: "Jobs Page",
+      description: "Jobs functionality coming soon!",
+    });
+  };
+
+  const handleCompaniesClick = () => {
+    toast({
+      title: "Companies Page", 
+      description: "Companies directory coming soon!",
+    });
+  };
+
+  const handleNetworkClick = () => {
+    toast({
+      title: "Network Page",
+      description: "Alumni network coming soon!",
+    });
+  };
+
+  const handleBrowseJobsClick = () => {
+    toast({
+      title: "Browse Jobs",
+      description: "Job browsing feature coming soon!",
+    });
+  };
+
+  const handleJoinNetworkClick = () => {
+    navigate("/auth");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -16,10 +57,10 @@ const Index = () => {
               <h1 className="text-2xl font-bold">CpE Alumni Network</h1>
             </div>
             <nav className="flex items-center gap-4">
-              <Button variant="ghost">Jobs</Button>
-              <Button variant="ghost">Companies</Button>
-              <Button variant="ghost">Network</Button>
-              <Button>Sign In</Button>
+              <Button variant="ghost" onClick={handleJobsClick}>Jobs</Button>
+              <Button variant="ghost" onClick={handleCompaniesClick}>Companies</Button>
+              <Button variant="ghost" onClick={handleNetworkClick}>Network</Button>
+              <Button onClick={handleSignInClick}>Sign In</Button>
             </nav>
           </div>
         </div>
@@ -36,11 +77,11 @@ const Index = () => {
             Connect with fellow CpE alumni, discover career opportunities, and build your professional network in tech industry.
           </p>
           <div className="flex justify-center gap-4">
-            <Button size="lg" className="px-8">
+            <Button size="lg" className="px-8" onClick={handleBrowseJobsClick}>
               <Briefcase className="mr-2 h-5 w-5" />
               Browse Jobs
             </Button>
-            <Button size="lg" variant="outline" className="px-8">
+            <Button size="lg" variant="outline" className="px-8" onClick={handleJoinNetworkClick}>
               <Users className="mr-2 h-5 w-5" />
               Join Network
             </Button>
@@ -125,14 +166,17 @@ const Index = () => {
                       Posted {job.posted}
                     </div>
                     <div className="font-semibold text-primary">{job.salary}</div>
-                    <Button className="w-full mt-4">Apply Now</Button>
+                    <Button className="w-full mt-4" onClick={() => toast({
+                      title: "Apply Now",
+                      description: "Job application feature coming soon!",
+                    })}>Apply Now</Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
           <div className="text-center mt-8">
-            <Button variant="outline" size="lg">View All Jobs</Button>
+            <Button variant="outline" size="lg" onClick={handleJobsClick}>View All Jobs</Button>
           </div>
         </div>
       </section>
