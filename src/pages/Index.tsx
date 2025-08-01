@@ -14,10 +14,7 @@ const Index = () => {
   };
 
   const handleJobsClick = () => {
-    toast({
-      title: "Jobs Page",
-      description: "Jobs functionality coming soon!",
-    });
+    navigate("/jobs");
   };
 
   const handleCompaniesClick = () => {
@@ -35,10 +32,7 @@ const Index = () => {
   };
 
   const handleBrowseJobsClick = () => {
-    toast({
-      title: "Browse Jobs",
-      description: "Job browsing feature coming soon!",
-    });
+    navigate("/jobs");
   };
 
   const handleJoinNetworkClick = () => {
@@ -166,10 +160,7 @@ const Index = () => {
                       Posted {job.posted}
                     </div>
                     <div className="font-semibold text-primary">{job.salary}</div>
-                    <Button className="w-full mt-4" onClick={() => toast({
-                      title: "Apply Now",
-                      description: "Job application feature coming soon!",
-                    })}>Apply Now</Button>
+                    <Button className="w-full mt-4" onClick={() => navigate("/jobs")}>View Jobs</Button>
                   </div>
                 </CardContent>
               </Card>
