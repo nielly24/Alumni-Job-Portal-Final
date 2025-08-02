@@ -74,7 +74,7 @@ const Jobs = () => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          job.company.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLocation = !locationFilter || job.location.toLowerCase().includes(locationFilter.toLowerCase());
-    const matchesType = !typeFilter || job.type === typeFilter;
+    const matchesType = !typeFilter || typeFilter === "all" || job.type === typeFilter;
     return matchesSearch && matchesLocation && matchesType;
   });
 
@@ -157,7 +157,7 @@ const Jobs = () => {
               <SelectValue placeholder="Job Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="Full-time">Full-time</SelectItem>
               <SelectItem value="Part-time">Part-time</SelectItem>
               <SelectItem value="Contract">Contract</SelectItem>
