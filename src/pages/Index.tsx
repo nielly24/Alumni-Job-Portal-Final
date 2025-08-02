@@ -1,7 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Building, Clock, Users, Briefcase, GraduationCap } from "lucide-react";
+import { Users, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -83,94 +81,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">500+</div>
-              <div className="text-muted-foreground">Active Alumni</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">250+</div>
-              <div className="text-muted-foreground">Job Openings</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">100+</div>
-              <div className="text-muted-foreground">Partner Companies</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">95%</div>
-              <div className="text-muted-foreground">Success Rate</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Featured Jobs */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Featured Opportunities</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Senior Software Engineer",
-                company: "TechCorp Inc.",
-                location: "San Francisco, CA",
-                type: "Full-time",
-                salary: "$120k - $160k",
-                posted: "2 days ago"
-              },
-              {
-                title: "AI/ML Engineer",
-                company: "DataTech Solutions",
-                location: "Seattle, WA",
-                type: "Full-time",
-                salary: "$130k - $170k",
-                posted: "1 week ago"
-              },
-              {
-                title: "DevOps Engineer",
-                company: "CloudFirst",
-                location: "Austin, TX",
-                type: "Remote",
-                salary: "$110k - $150k",
-                posted: "3 days ago"
-              }
-            ].map((job, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-start justify-between">
-                    <span>{job.title}</span>
-                    <Badge variant="secondary">{job.type}</Badge>
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-1">
-                    <Building className="h-4 w-4" />
-                    {job.company}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {job.location}
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      Posted {job.posted}
-                    </div>
-                    <div className="font-semibold text-primary">{job.salary}</div>
-                    <Button className="w-full mt-4" onClick={() => navigate("/jobs")}>View Jobs</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Button variant="outline" size="lg" onClick={handleJobsClick}>View All Jobs</Button>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="bg-card border-t py-12">
