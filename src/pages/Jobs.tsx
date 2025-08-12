@@ -51,6 +51,7 @@ const Jobs = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Supabase error:', error);
         toast({
           title: "Error",
           description: "Failed to fetch jobs",
@@ -60,6 +61,7 @@ const Jobs = () => {
         setJobs(data || []);
       }
     } catch (error) {
+      console.error('Fetch error:', error);
       toast({
         title: "Error",
         description: "Failed to fetch jobs",
