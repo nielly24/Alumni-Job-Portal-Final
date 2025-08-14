@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MapPin, Building, Clock, Briefcase, Search, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { User, Session } from '@supabase/supabase-js';
 
 interface JobPosting {
   id: string;
@@ -18,8 +19,17 @@ interface JobPosting {
   salary_min?: number;
   salary_max?: number;
   description: string;
+  requirements?: string;
+  benefits?: string;
+  application_url?: string;
+  application_email?: string;
   created_at: string;
   featured: boolean;
+  is_active: boolean;
+  user_id: string;
+  profiles?: {
+    full_name: string;
+  } | null;
 }
 
 const Jobs = () => {
@@ -28,90 +38,74 @@ const Jobs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    checkAuth();
-    fetchJobs();
-  }, []);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setUser(session?.user || null);
-  };
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    // Fetch jobs
+    fetchJobs();
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const fetchJobs = async () => {
     try {
-      // Mock data for local development
-      const mockJobs = [
-        {
-          id: '1',
-          title: 'Senior Software Engineer',
-          company: 'Tech Innovations Inc.',
-          location: 'San Francisco, CA',
-          type: 'Full-time',
-          salary_min: 120000,
-          salary_max: 180000,
-          description: 'We are looking for a senior software engineer to join our growing team. You will work on cutting-edge technologies and lead exciting projects.',
-          created_at: '2024-01-15T10:00:00Z',
-          featured: true
-        },
-        {
-          id: '2',
-          title: 'Product Manager',
-          company: 'Startup Hub',
-          location: 'New York, NY',
-          type: 'Full-time',
-          salary_min: 100000,
-          salary_max: 140000,
-          description: 'Join our product team to drive innovation and growth. You will be responsible for product strategy and roadmap development.',
-          created_at: '2024-01-14T09:00:00Z',
-          featured: false
-        },
-        {
-          id: '3',
-          title: 'Marketing Specialist',
-          company: 'Creative Agency',
-          location: 'Remote',
-          type: 'Contract',
-          salary_min: 60000,
-          salary_max: 80000,
-          description: 'Looking for a creative marketing specialist to lead our digital campaigns and brand development initiatives.',
-          created_at: '2024-01-13T08:00:00Z',
-          featured: false
-        },
-        {
-          id: '4',
-          title: 'Frontend Developer',
-          company: 'Digital Solutions',
-          location: 'Austin, TX',
-          type: 'Full-time',
-          salary_min: 90000,
-          salary_max: 130000,
-          description: 'Build amazing user experiences with React and modern frontend technologies. Perfect for someone passionate about UI/UX.',
-          created_at: '2024-01-12T07:00:00Z',
-          featured: false
-        },
-        {
-          id: '5',
-          title: 'Data Analyst Intern',
-          company: 'Analytics Corp',
-          location: 'Boston, MA',
-          type: 'Internship',
-          salary_min: 25000,
-          salary_max: 35000,
-          description: 'Great opportunity for students to gain hands-on experience in data analysis and business intelligence.',
-          created_at: '2024-01-11T06:00:00Z',
-          featured: false
-        }
-      ];
-
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      setLoading(true);
       
-      setJobs(mockJobs);
+      const { data, error } = await supabase
+        .from('job_postings')
+        .select(`
+          id,
+          title,
+          company,
+          location,
+          type,
+          salary_min,
+          salary_max,
+          description,
+          requirements,
+          benefits,
+          application_url,
+          application_email,
+          created_at,
+          featured,
+          is_active,
+          user_id
+        `)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch jobs",
+          variant: "destructive",
+        });
+      } else {
+        // Transform data to match our interface
+        const transformedJobs = (data || []).map(job => ({
+          ...job,
+          profiles: null // We'll add profile fetching later if needed
+        }));
+        setJobs(transformedJobs);
+      }
     } catch (error) {
       console.error('Fetch error:', error);
       toast({
