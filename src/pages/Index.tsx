@@ -1,11 +1,31 @@
 import { Button } from "@/components/ui/button";
-import { Users, Briefcase } from "lucide-react";
+import { Users, Briefcase, User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check for existing user session
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSignInClick = () => {
     navigate("/auth");
@@ -37,6 +57,26 @@ const Index = () => {
     navigate("/auth");
   };
 
+  const handleProfileClick = () => {
+    navigate("/profile");
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -52,7 +92,20 @@ const Index = () => {
               <Button variant="ghost" onClick={handleJobsClick}>Jobs</Button>
               <Button variant="ghost" onClick={handleCompaniesClick}>Companies</Button>
               <Button variant="ghost" onClick={handleNetworkClick}>Network</Button>
-              <Button onClick={handleSignInClick}>Sign In</Button>
+              {user ? (
+                <>
+                  <Button variant="ghost" onClick={handleProfileClick}>
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </Button>
+                  <Button variant="ghost" onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={handleSignInClick}>Sign In</Button>
+              )}
             </nav>
           </div>
         </div>
