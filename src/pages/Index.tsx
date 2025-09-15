@@ -92,7 +92,7 @@ const Index = () => {
               <Button variant="ghost" onClick={handleJobsClick}>Jobs</Button>
               <Button variant="ghost" onClick={handleCompaniesClick}>Companies</Button>
               <Button variant="ghost" onClick={handleNetworkClick}>Network</Button>
-              <Button variant="ghost" onClick={() => navigate("/system-proposal")}>System Proposal</Button>
+              
               {user ? (
                 <>
                   <Button variant="ghost" onClick={handleProfileClick}>
