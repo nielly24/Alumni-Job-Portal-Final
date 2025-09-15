@@ -347,6 +347,114 @@ const SystemProposal = () => {
           </CardContent>
         </Card>
 
+        {/* System Workflow Flowchart */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>System Workflow Flowchart</CardTitle>
+            <CardDescription>Complete user journey and system processes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-muted p-6 rounded-lg overflow-x-auto">
+              <div className="min-w-[800px]">
+                {/* User Entry Point */}
+                <div className="text-center mb-6">
+                  <div className="inline-block bg-blue-100 dark:bg-blue-900 px-4 py-2 rounded-lg border-2 border-blue-300 dark:border-blue-700">
+                    <strong>User Visits Portal</strong>
+                  </div>
+                </div>
+                
+                {/* Authentication Flow */}
+                <div className="grid grid-cols-2 gap-8 mb-8">
+                  <div className="text-center">
+                    <h4 className="font-semibold mb-4 text-primary">New User Registration</h4>
+                    <div className="space-y-3">
+                      <div className="bg-card border-2 border-primary/20 p-3 rounded-lg">Sign Up Process</div>
+                      <div className="text-primary">↓</div>
+                      <div className="bg-card border-2 border-primary/20 p-3 rounded-lg">Email Verification</div>
+                      <div className="text-primary">↓</div>
+                      <div className="bg-card border-2 border-primary/20 p-3 rounded-lg">Create Profile</div>
+                      <div className="text-primary">↓</div>
+                      <div className="bg-green-100 dark:bg-green-900 border-2 border-green-300 dark:border-green-700 p-3 rounded-lg font-semibold">Dashboard</div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <h4 className="font-semibold mb-4 text-primary">Existing User Login</h4>
+                    <div className="space-y-3">
+                      <div className="bg-card border-2 border-primary/20 p-3 rounded-lg">Login Process</div>
+                      <div className="text-primary">↓</div>
+                      <div className="bg-card border-2 border-primary/20 p-3 rounded-lg">Authentication Check</div>
+                      <div className="text-primary">↓</div>
+                      <div className="bg-green-100 dark:bg-green-900 border-2 border-green-300 dark:border-green-700 p-3 rounded-lg font-semibold">Dashboard</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main System Flows */}
+                <div className="grid grid-cols-3 gap-8">
+                  {/* Job Seeker Flow */}
+                  <div className="text-center">
+                    <h4 className="font-semibold mb-4 text-secondary">Job Seeker Journey</h4>
+                    <div className="space-y-3">
+                      <div className="bg-secondary/10 border-2 border-secondary/20 p-3 rounded-lg">Browse Jobs</div>
+                      <div className="text-secondary">↓</div>
+                      <div className="bg-secondary/10 border-2 border-secondary/20 p-3 rounded-lg">Search & Filter</div>
+                      <div className="text-secondary">↓</div>
+                      <div className="bg-secondary/10 border-2 border-secondary/20 p-3 rounded-lg">View Job Details</div>
+                      <div className="text-secondary">↓</div>
+                      <div className="bg-secondary/10 border-2 border-secondary/20 p-3 rounded-lg">Submit Application</div>
+                      <div className="text-secondary">↓</div>
+                      <div className="bg-secondary/10 border-2 border-secondary/20 p-3 rounded-lg">Upload Resume</div>
+                      <div className="text-secondary">↓</div>
+                      <div className="bg-green-100 dark:bg-green-900 border-2 border-green-300 dark:border-green-700 p-3 rounded-lg font-semibold">Track Application</div>
+                    </div>
+                  </div>
+                  
+                  {/* Employer Flow */}
+                  <div className="text-center">
+                    <h4 className="font-semibold mb-4 text-accent">Employer Journey</h4>
+                    <div className="space-y-3">
+                      <div className="bg-accent/10 border-2 border-accent/20 p-3 rounded-lg">Post New Job</div>
+                      <div className="text-accent">↓</div>
+                      <div className="bg-accent/10 border-2 border-accent/20 p-3 rounded-lg">Fill Job Details</div>
+                      <div className="text-accent">↓</div>
+                      <div className="bg-accent/10 border-2 border-accent/20 p-3 rounded-lg">Set Requirements</div>
+                      <div className="text-accent">↓</div>
+                      <div className="bg-green-100 dark:bg-green-900 border-2 border-green-300 dark:border-green-700 p-3 rounded-lg font-semibold">Publish Job</div>
+                      <div className="text-accent">↓</div>
+                      <div className="bg-accent/10 border-2 border-accent/20 p-3 rounded-lg">Review Applications</div>
+                      <div className="text-accent">↓</div>
+                      <div className="bg-accent/10 border-2 border-accent/20 p-3 rounded-lg">Update Status</div>
+                    </div>
+                  </div>
+                  
+                  {/* Profile Management */}
+                  <div className="text-center">
+                    <h4 className="font-semibold mb-4 text-muted-foreground">Profile Management</h4>
+                    <div className="space-y-3">
+                      <div className="bg-muted border-2 border-muted-foreground/20 p-3 rounded-lg">Edit Personal Info</div>
+                      <div className="bg-muted border-2 border-muted-foreground/20 p-3 rounded-lg">Update Employment</div>
+                      <div className="bg-muted border-2 border-muted-foreground/20 p-3 rounded-lg">Manage Applications</div>
+                      <div className="text-muted-foreground">↓</div>
+                      <div className="bg-green-100 dark:bg-green-900 border-2 border-green-300 dark:border-green-700 p-3 rounded-lg font-semibold">Save Changes</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notification System */}
+                <div className="text-center mt-8">
+                  <div className="inline-block bg-orange-100 dark:bg-orange-900 border-2 border-orange-300 dark:border-orange-700 p-4 rounded-lg font-semibold">
+                    Real-time Notification System
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    All user actions trigger real-time updates and notifications across the platform
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Implementation Benefits */}
         <Card className="mb-8">
           <CardHeader>
