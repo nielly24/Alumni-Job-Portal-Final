@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
+  const { isAdmin } = useUserRole(user?.id);
 
   useEffect(() => {
     // Check for existing user session
@@ -95,6 +97,11 @@ const Index = () => {
               
               {user ? (
                 <>
+                  {isAdmin && (
+                    <Button variant="ghost" onClick={() => navigate("/admin")}>
+                      Admin
+                    </Button>
+                  )}
                   <Button variant="ghost" onClick={handleProfileClick}>
                     <User className="w-4 h-4 mr-2" />
                     Profile
