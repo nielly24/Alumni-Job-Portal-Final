@@ -11,9 +11,12 @@ export const useUserRole = (userId?: string) => {
 
   useEffect(() => {
     if (!userId) {
+      console.log('useUserRole: No userId provided');
       setLoading(false);
       return;
     }
+
+    console.log('useUserRole: Fetching role for userId:', userId);
 
     const fetchUserRole = async () => {
       try {
@@ -25,11 +28,17 @@ export const useUserRole = (userId?: string) => {
           .limit(1)
           .single();
 
+        console.log('useUserRole: Query result:', { data, error });
+
         if (error) throw error;
         
-        setRole(data?.role || 'alumni');
+        const userRole = data?.role || 'alumni';
+        console.log('useUserRole: Setting role to:', userRole);
+        setRole(userRole);
       } catch (error) {
         console.error('Error fetching user role:', error);
+        console.log('useUserRole: Defaulting to alumni role');
+        setRole('alumni');
         toast({
           title: "Error",
           description: "Failed to fetch user role",
