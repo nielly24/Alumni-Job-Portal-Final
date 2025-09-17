@@ -51,7 +51,8 @@ const Admin = () => {
   const { role: userRole, loading: roleLoading } = useUserRole(currentUser?.id);
 
   useEffect(() => {
-    if (!roleLoading && currentUser && userRole !== 'admin') {
+    // Only deny access if we have a definitive role that's not admin
+    if (!roleLoading && currentUser && userRole && userRole !== 'admin') {
       toast({
         title: "Access Denied",
         description: "You don't have permission to access this page",
