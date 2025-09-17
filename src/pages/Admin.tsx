@@ -27,23 +27,31 @@ interface UserWithRole {
 const Admin = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Check if current user is admin
   useEffect(() => {
-    const getCurrentUser = async () => {
+    // Get initial user
+    const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
     };
-    getCurrentUser();
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setCurrentUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const { role: userRole, loading: roleLoading } = useUserRole(currentUser?.id);
 
   useEffect(() => {
-    if (!roleLoading && userRole !== 'admin') {
+    if (!roleLoading && currentUser && userRole !== 'admin') {
       toast({
         title: "Access Denied",
         description: "You don't have permission to access this page",
@@ -52,7 +60,7 @@ const Admin = () => {
       navigate('/');
       return;
     }
-  }, [userRole, roleLoading, navigate, toast]);
+  }, [userRole, roleLoading, currentUser, navigate, toast]);
 
   useEffect(() => {
     if (userRole === 'admin') {
