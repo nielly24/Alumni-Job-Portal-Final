@@ -80,9 +80,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="border-b bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -145,7 +145,7 @@ const Index = () => {
 
 
       {/* Footer */}
-      <footer className="bg-card border-t py-12">
+      <footer className="bg-card/80 backdrop-blur-sm border-t py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
