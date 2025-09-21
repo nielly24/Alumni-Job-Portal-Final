@@ -100,6 +100,10 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-image: url('/background-gradient.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
   }
 }
