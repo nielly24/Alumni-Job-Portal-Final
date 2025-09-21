@@ -105,4 +105,9 @@ All colors MUST be HSL.
     background-attachment: fixed;
     min-height: 100vh;
   }
+
+  #root {
+    background: transparent;
+    min-height: 100vh;
+  }
 }
