@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useVerificationStatus } from '@/hooks/useVerificationStatus';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, Clock, ArrowLeft } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface VerificationGuardProps {
@@ -12,6 +14,7 @@ interface VerificationGuardProps {
 export const VerificationGuard = ({ children }: VerificationGuardProps) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getUser = async () => {
@@ -70,6 +73,14 @@ export const VerificationGuard = ({ children }: VerificationGuardProps) => {
                 }
               </AlertDescription>
             </Alert>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/')} 
+              className="w-full mt-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
           </CardContent>
         </Card>
       </div>
