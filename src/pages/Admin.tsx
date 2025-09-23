@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, GraduationCap, Settings, ArrowLeft } from 'lucide-react';
+import { Users, Building2, GraduationCap, Settings, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,6 +16,8 @@ interface Profile {
   company: string | null;
   role: string | null;
   bio: string | null;
+  id_number: string | null;
+  verification_status: string | null;
   created_at: string;
 }
 
@@ -32,7 +34,6 @@ const Admin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get initial user
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
@@ -40,7 +41,6 @@ const Admin = () => {
 
     getUser();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setCurrentUser(session?.user ?? null);
     });
@@ -51,7 +51,6 @@ const Admin = () => {
   const { role: userRole, loading: roleLoading } = useUserRole(currentUser?.id);
 
   useEffect(() => {
-    // Only deny access if we have a definitive role that's not admin
     if (!roleLoading && currentUser && userRole && userRole !== 'admin') {
       toast({
         title: "Access Denied",
@@ -73,7 +72,6 @@ const Admin = () => {
     try {
       setLoading(true);
       
-      // Fetch all profiles with their roles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
@@ -81,14 +79,12 @@ const Admin = () => {
 
       if (profilesError) throw profilesError;
 
-      // Fetch user roles for all users
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role');
 
       if (rolesError) throw rolesError;
 
-      // Combine profiles with roles
       const usersWithRoles = profiles?.map(profile => {
         const userRole = roles?.find(r => r.user_id === profile.user_id);
         return {
@@ -110,6 +106,31 @@ const Admin = () => {
     }
   };
 
+  const verifyUser = async (userId: string, approve: boolean) => {
+    try {
+      const { error } = await supabase.rpc('verify_user', {
+        target_user_id: userId,
+        approve: approve
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `User ${approve ? 'approved' : 'rejected'} successfully`,
+      });
+
+      fetchAllUsers();
+    } catch (error) {
+      console.error('Error verifying user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to verify user",
+        variant: "destructive",
+      });
+    }
+  };
+
   const updateUserRole = async (userId: string, newRole: 'admin' | 'employer' | 'alumni') => {
     try {
       const { error } = await supabase
@@ -123,7 +144,6 @@ const Admin = () => {
         description: "User role updated successfully",
       });
 
-      // Refresh the users list
       fetchAllUsers();
     } catch (error) {
       console.error('Error updating user role:', error);
@@ -135,17 +155,12 @@ const Admin = () => {
     }
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case 'admin': return 'destructive';
-      case 'employer': return 'default';
-      case 'alumni': return 'secondary';
-      default: return 'outline';
-    }
-  };
-
   const filterUsersByRole = (targetRole: string) => {
     return users.filter(user => user.user_role === targetRole);
+  };
+
+  const filterUsersByVerification = (status: string) => {
+    return users.filter(user => user.profile.verification_status === status);
   };
 
   if (roleLoading || loading) {
@@ -160,12 +175,13 @@ const Admin = () => {
   }
 
   if (userRole !== 'admin') {
-    return null; // Will redirect in useEffect
+    return null;
   }
 
   const employers = filterUsersByRole('employer');
   const alumni = filterUsersByRole('alumni');
   const admins = filterUsersByRole('admin');
+  const pendingUsers = filterUsersByVerification('pending');
 
   return (
     <div className="min-h-screen">
@@ -186,8 +202,17 @@ const Admin = () => {
           <p className="text-muted-foreground">Manage users and view system statistics</p>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending Verification</CardTitle>
+              <AlertCircle className="h-4 w-4 text-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">{pendingUsers.length}</div>
+            </CardContent>
+          </Card>
+          
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -229,19 +254,23 @@ const Admin = () => {
           </Card>
         </div>
 
-        {/* Users Management */}
         <Card>
           <CardHeader>
             <CardTitle>User Management</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+            <Tabs defaultValue="pending" className="w-full">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="pending">Pending ({pendingUsers.length})</TabsTrigger>
                 <TabsTrigger value="all">All Users</TabsTrigger>
                 <TabsTrigger value="alumni">Alumni</TabsTrigger>
                 <TabsTrigger value="employer">Employers</TabsTrigger>
                 <TabsTrigger value="admin">Admins</TabsTrigger>
               </TabsList>
+
+              <TabsContent value="pending" className="space-y-4">
+                <PendingUserList users={pendingUsers} onVerify={verifyUser} />
+              </TabsContent>
 
               <TabsContent value="all" className="space-y-4">
                 <UserList users={users} onRoleUpdate={updateUserRole} />
@@ -262,6 +291,69 @@ const Admin = () => {
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+};
+
+interface PendingUserListProps {
+  users: UserWithRole[];
+  onVerify: (userId: string, approve: boolean) => void;
+}
+
+const PendingUserList = ({ users, onVerify }: PendingUserListProps) => {
+  return (
+    <div className="space-y-4">
+      {users.map((user) => (
+        <Card key={user.profile.id} className="p-4 border-yellow-200">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium">
+                  {user.profile.full_name || 'No name provided'}
+                </h3>
+                <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                  Pending Verification
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                <strong>ID Number:</strong> {user.profile.id_number || 'Not provided'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {user.profile.company || 'No company'} • {user.profile.role || 'No role'}
+              </p>
+              {user.profile.bio && (
+                <p className="text-sm text-muted-foreground mt-2">{user.profile.bio}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Applied: {new Date(user.profile.created_at).toLocaleDateString()}
+              </p>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onVerify(user.profile.user_id, false)}
+                className="border-red-300 text-red-600 hover:bg-red-50"
+              >
+                Reject
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => onVerify(user.profile.user_id, true)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Approve
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ))}
+      {users.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          No pending verifications
+        </div>
+      )}
     </div>
   );
 };
@@ -295,6 +387,10 @@ const UserList = ({ users, onRoleUpdate }: UserListProps) => {
                   {user.user_role}
                 </Badge>
               </div>
+              <p className="text-sm text-muted-foreground">
+                <strong>ID:</strong> {user.profile.id_number || 'Not provided'} • 
+                <strong>Status:</strong> {user.profile.verification_status || 'pending'}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {user.profile.company || 'No company'} • {user.profile.role || 'No role'}
               </p>
