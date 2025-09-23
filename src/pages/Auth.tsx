@@ -15,7 +15,6 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
-  const [idNumber, setIdNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -48,7 +47,6 @@ const Auth = () => {
             full_name: fullName,
             company,
             role,
-            id_number: idNumber,
           }
         }
       });
@@ -233,17 +231,6 @@ const Auth = () => {
                         )}
                       </Button>
                     </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-id">ID Number</Label>
-                    <Input
-                      id="signup-id"
-                      type="text"
-                      placeholder="Your alumni ID number"
-                      value={idNumber}
-                      onChange={(e) => setIdNumber(e.target.value)}
-                      required
-                    />
                   </div>
                   <div>
                     <Label htmlFor="signup-company">Company (Optional)</Label>

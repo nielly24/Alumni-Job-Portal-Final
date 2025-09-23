@@ -171,13 +171,9 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
-          id_number: string | null
           role: string | null
           updated_at: string
           user_id: string
-          verification_status: string
-          verified_at: string | null
-          verified_by: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -186,13 +182,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
-          id_number?: string | null
           role?: string | null
           updated_at?: string
           user_id: string
-          verification_status?: string
-          verified_at?: string | null
-          verified_by?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -201,13 +193,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
-          id_number?: string | null
           role?: string | null
           updated_at?: string
           user_id?: string
-          verification_status?: string
-          verified_at?: string | null
-          verified_by?: string | null
         }
         Relationships: []
       }
@@ -255,10 +243,6 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
-      }
-      verify_user: {
-        Args: { approve: boolean; target_user_id: string }
-        Returns: undefined
       }
     }
     Enums: {
