@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useUserRole } from "@/hooks/useUserRole";
+import CommunityStats from "@/components/CommunityStats";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -142,7 +143,8 @@ const Index = () => {
         </div>
       </section>
 
-
+      {/* Community Stats */}
+      <CommunityStats />
 
       {/* Footer */}
       <footer className="bg-card/80 backdrop-blur-sm border-t py-12">

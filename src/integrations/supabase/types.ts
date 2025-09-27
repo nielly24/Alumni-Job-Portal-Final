@@ -165,37 +165,64 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: Database["public"]["Enums"]["account_type"]
           avatar_url: string | null
           bio: string | null
           company: string | null
+          company_description: string | null
+          company_size: string | null
+          company_website: string | null
+          contact_phone: string | null
           created_at: string
           full_name: string | null
           id: string
+          id_number: string | null
           role: string | null
           updated_at: string
           user_id: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
+          account_type?: Database["public"]["Enums"]["account_type"]
           avatar_url?: string | null
           bio?: string | null
           company?: string | null
+          company_description?: string | null
+          company_size?: string | null
+          company_website?: string | null
+          contact_phone?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          id_number?: string | null
           role?: string | null
           updated_at?: string
           user_id: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
+          account_type?: Database["public"]["Enums"]["account_type"]
           avatar_url?: string | null
           bio?: string | null
           company?: string | null
+          company_description?: string | null
+          company_size?: string | null
+          company_website?: string | null
+          contact_phone?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          id_number?: string | null
           role?: string | null
           updated_at?: string
           user_id?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
@@ -244,8 +271,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      verify_user: {
+        Args: { approve: boolean; target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
+      account_type: "alumni" | "employer"
       app_role: "admin" | "employer" | "alumni"
     }
     CompositeTypes: {
@@ -374,6 +406,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: ["alumni", "employer"],
       app_role: ["admin", "employer", "alumni"],
     },
   },
