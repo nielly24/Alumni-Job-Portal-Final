@@ -121,13 +121,13 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-r from-primary/5 to-secondary/5">
+      <section className="py-20 bg-gradient-to-r from-primary/10 to-secondary/10">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-6">
+          <h1 className="text-5xl font-bold mb-6 text-foreground">
             Computer Engineering Alumni
             <span className="block text-primary">Job Portal</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
             Connect with fellow CpE alumni, discover career opportunities, and build your professional network in tech industry.
           </p>
           <div className="flex justify-center gap-4">
