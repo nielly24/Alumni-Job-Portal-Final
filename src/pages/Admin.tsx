@@ -5,9 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, GraduationCap, Settings, ArrowLeft } from 'lucide-react';
+import { Users, Building2, GraduationCap, Settings, ArrowLeft, Briefcase, Trash2 } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Profile {
   id: string;
@@ -24,8 +35,20 @@ interface UserWithRole {
   user_role: string;
 }
 
+interface JobPosting {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  created_at: string;
+  is_active: boolean;
+  user_id: string;
+}
+
 const Admin = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
@@ -66,6 +89,7 @@ const Admin = () => {
   useEffect(() => {
     if (userRole === 'admin') {
       fetchAllUsers();
+      fetchJobPostings();
     }
   }, [userRole]);
 
@@ -135,6 +159,51 @@ const Admin = () => {
     }
   };
 
+  const fetchJobPostings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('job_postings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setJobPostings(data || []);
+    } catch (error) {
+      console.error('Error fetching job postings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch job postings",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteJobPosting = async (jobId: string) => {
+    try {
+      const { error } = await supabase
+        .from('job_postings')
+        .delete()
+        .eq('id', jobId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Job posting deleted successfully",
+      });
+
+      // Refresh the job postings list
+      fetchJobPostings();
+    } catch (error) {
+      console.error('Error deleting job posting:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete job posting",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin': return 'destructive';
@@ -187,7 +256,7 @@ const Admin = () => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -227,6 +296,16 @@ const Admin = () => {
               <div className="text-2xl font-bold">{admins.length}</div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Job Postings</CardTitle>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{jobPostings.length}</div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Users Management */}
@@ -236,11 +315,12 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="all">All Users</TabsTrigger>
                 <TabsTrigger value="alumni">Alumni</TabsTrigger>
                 <TabsTrigger value="employer">Employers</TabsTrigger>
                 <TabsTrigger value="admin">Admins</TabsTrigger>
+                <TabsTrigger value="jobs">Job Postings</TabsTrigger>
               </TabsList>
 
               <TabsContent value="all" className="space-y-4">
@@ -257,6 +337,13 @@ const Admin = () => {
 
               <TabsContent value="admin" className="space-y-4">
                 <UserList users={admins} onRoleUpdate={updateUserRole} />
+              </TabsContent>
+
+              <TabsContent value="jobs" className="space-y-4">
+                <JobPostingsList 
+                  jobPostings={jobPostings} 
+                  onDelete={handleDeleteJobPosting}
+                />
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -338,6 +425,72 @@ const UserList = ({ users, onRoleUpdate }: UserListProps) => {
       {users.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           No users found in this category
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface JobPostingsListProps {
+  jobPostings: JobPosting[];
+  onDelete: (jobId: string) => void;
+}
+
+const JobPostingsList = ({ jobPostings, onDelete }: JobPostingsListProps) => {
+  return (
+    <div className="space-y-4">
+      {jobPostings.map((job) => (
+        <Card key={job.id} className="p-4">
+          <div className="flex items-start justify-between">
+            <div className="space-y-1 flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium">{job.title}</h3>
+                <Badge variant={job.is_active ? "default" : "secondary"}>
+                  {job.is_active ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {job.company} • {job.location} • {job.type}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Posted: {new Date(job.created_at).toLocaleDateString()}
+              </p>
+            </div>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="ml-4"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Job Posting</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{job.title}" at {job.company}? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => onDelete(job.id)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </Card>
+      ))}
+      {jobPostings.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          No job postings found
         </div>
       )}
     </div>
