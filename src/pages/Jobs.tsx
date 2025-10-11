@@ -208,9 +208,7 @@ const Jobs = () => {
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="Full-time">Full-time</SelectItem>
               <SelectItem value="Part-time">Part-time</SelectItem>
-              <SelectItem value="Contract">Contract</SelectItem>
               <SelectItem value="Remote">Remote</SelectItem>
-              <SelectItem value="Internship">Internship</SelectItem>
             </SelectContent>
           </Select>
           <Button 
