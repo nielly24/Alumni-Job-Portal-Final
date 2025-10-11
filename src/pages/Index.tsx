@@ -38,20 +38,6 @@ const Index = () => {
     navigate("/jobs");
   };
 
-  const handleCompaniesClick = () => {
-    toast({
-      title: "Companies Page", 
-      description: "Companies directory coming soon!",
-    });
-  };
-
-  const handleNetworkClick = () => {
-    toast({
-      title: "Network Page",
-      description: "Alumni network coming soon!",
-    });
-  };
-
   const handleBrowseJobsClick = () => {
     navigate("/jobs");
   };
@@ -93,8 +79,6 @@ const Index = () => {
             </div>
             <nav className="flex items-center gap-4">
               <Button variant="ghost" onClick={handleJobsClick}>Jobs</Button>
-              <Button variant="ghost" onClick={handleCompaniesClick}>Companies</Button>
-              <Button variant="ghost" onClick={handleNetworkClick}>Network</Button>
               
               {user ? (
                 <>
