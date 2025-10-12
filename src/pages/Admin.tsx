@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, GraduationCap, Settings, ArrowLeft, Briefcase, Trash2 } from 'lucide-react';
+import { Users, Building2, GraduationCap, Settings, ArrowLeft, Briefcase, Trash2, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -28,6 +28,8 @@ interface Profile {
   role: string | null;
   bio: string | null;
   created_at: string;
+  verification_status: string;
+  account_type: string;
 }
 
 interface UserWithRole {
@@ -48,6 +50,7 @@ interface JobPosting {
 
 const Admin = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<Profile[]>([]);
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -89,6 +92,7 @@ const Admin = () => {
   useEffect(() => {
     if (userRole === 'admin') {
       fetchAllUsers();
+      fetchPendingUsers();
       fetchJobPostings();
     }
   }, [userRole]);
@@ -131,6 +135,53 @@ const Admin = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPendingUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('verification_status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPendingUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching pending users:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch pending users",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleVerifyUser = async (userId: string, approve: boolean) => {
+    try {
+      const { error } = await supabase.rpc('verify_user', {
+        target_user_id: userId,
+        approve: approve
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `User ${approve ? 'approved' : 'rejected'} successfully`,
+      });
+
+      // Refresh both lists
+      fetchPendingUsers();
+      fetchAllUsers();
+    } catch (error) {
+      console.error('Error verifying user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to verify user",
+        variant: "destructive",
+      });
     }
   };
 
@@ -256,7 +307,16 @@ const Admin = () => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending Verifications</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{pendingUsers.length}</div>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -314,14 +374,22 @@ const Admin = () => {
             <CardTitle>User Management</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+            <Tabs defaultValue="pending" className="w-full">
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="pending">Pending</TabsTrigger>
                 <TabsTrigger value="all">All Users</TabsTrigger>
                 <TabsTrigger value="alumni">Alumni</TabsTrigger>
                 <TabsTrigger value="employer">Employers</TabsTrigger>
                 <TabsTrigger value="admin">Admins</TabsTrigger>
                 <TabsTrigger value="jobs">Job Postings</TabsTrigger>
               </TabsList>
+
+              <TabsContent value="pending" className="space-y-4">
+                <PendingUsersList 
+                  users={pendingUsers} 
+                  onVerify={handleVerifyUser}
+                />
+              </TabsContent>
 
               <TabsContent value="all" className="space-y-4">
                 <UserList users={users} onRoleUpdate={updateUserRole} />
@@ -357,6 +425,69 @@ interface UserListProps {
   users: UserWithRole[];
   onRoleUpdate: (userId: string, newRole: 'admin' | 'employer' | 'alumni') => void;
 }
+
+interface PendingUsersListProps {
+  users: Profile[];
+  onVerify: (userId: string, approve: boolean) => void;
+}
+
+const PendingUsersList = ({ users, onVerify }: PendingUsersListProps) => {
+  return (
+    <div className="space-y-4">
+      {users.map((user) => (
+        <Card key={user.id} className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium">
+                  {user.full_name || 'No name provided'}
+                </h3>
+                <Badge variant="outline">
+                  {user.account_type}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {user.company || 'No company'} • {user.role || 'No role'}
+              </p>
+              {user.bio && (
+                <p className="text-sm text-muted-foreground mt-2">{user.bio}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Registered: {new Date(user.created_at).toLocaleDateString()}
+              </p>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onVerify(user.user_id, true)}
+                className="text-green-600 hover:text-green-700"
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Approve
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onVerify(user.user_id, false)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <XCircle className="h-4 w-4 mr-1" />
+                Reject
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ))}
+      {users.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          No pending verification requests
+        </div>
+      )}
+    </div>
+  );
+};
 
 const UserList = ({ users, onRoleUpdate }: UserListProps) => {
   const getRoleBadgeVariant = (role: string) => {
