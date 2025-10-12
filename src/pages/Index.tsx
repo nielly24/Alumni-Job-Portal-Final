@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useUserRole } from "@/hooks/useUserRole";
 import CommunityStats from "@/components/CommunityStats";
+import VerificationBanner from "@/components/VerificationBanner";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -103,6 +104,13 @@ const Index = () => {
           </div>
         </div>
       </header>
+
+      {/* Verification Banner */}
+      {user && (
+        <div className="container mx-auto px-4 pt-6">
+          <VerificationBanner userId={user.id} />
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-r from-primary/10 to-secondary/10">
