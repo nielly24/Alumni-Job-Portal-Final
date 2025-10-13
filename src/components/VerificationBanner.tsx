@@ -18,7 +18,7 @@ const VerificationBanner = ({ userId }: VerificationBannerProps) => {
           .from('profiles')
           .select('verification_status')
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         setVerificationStatus(data?.verification_status || 'pending');

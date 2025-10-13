@@ -231,7 +231,7 @@ const JobDetails = () => {
                 <Button onClick={handleApply} className="w-full" size="lg">
                   {job.application_url ? "Apply on Company Website" : "Apply Now"}
                 </Button>
-                {job.application_email && (
+                {user && job.application_email && (
                   <div className="text-sm text-muted-foreground">
                     <p>Or email your resume to:</p>
                     <a 
@@ -247,7 +247,7 @@ const JobDetails = () => {
                     <Button variant="link" onClick={() => navigate("/auth")} className="p-0 h-auto">
                       Sign in
                     </Button>
-                    {" "}to save this job and track your applications
+                    {" "}to view employer contact details and apply
                   </p>
                 )}
               </CardContent>
