@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
-export type UserRole = 'admin' | 'employer' | 'alumni';
+export type UserRole = 'admin' | 'alumni';
 
 export const useUserRole = (userId?: string) => {
   const [role, setRole] = useState<UserRole | null>(null);

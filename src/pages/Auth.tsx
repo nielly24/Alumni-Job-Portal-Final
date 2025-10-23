@@ -5,11 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Building, GraduationCap } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -17,13 +15,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
-  const [accountType, setAccountType] = useState("alumni");
   const [idNumber, setIdNumber] = useState("");
-  // Employer-specific fields
-  const [companySize, setCompanySize] = useState("");
-  const [companyWebsite, setCompanyWebsite] = useState("");
-  const [companyDescription, setCompanyDescription] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -51,19 +43,9 @@ const Auth = () => {
         full_name: fullName,
         company,
         role,
-        account_type: accountType,
+        account_type: 'alumni',
         id_number: idNumber,
       };
-
-      // Add employer-specific fields if account type is employer
-      if (accountType === 'employer') {
-        Object.assign(signupData, {
-          company_size: companySize,
-          company_website: companyWebsite,
-          company_description: companyDescription,
-          contact_phone: contactPhone,
-        });
-      }
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -206,31 +188,6 @@ const Auth = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignUp} className="space-y-4">
-                  {/* Account Type Selection */}
-                  <div>
-                    <Label>I am joining as:</Label>
-                    <RadioGroup 
-                      value={accountType} 
-                      onValueChange={setAccountType}
-                      className="flex gap-6 mt-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="alumni" id="alumni" />
-                        <Label htmlFor="alumni" className="flex items-center gap-2 cursor-pointer">
-                          <GraduationCap className="h-4 w-4" />
-                          Alumni
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="employer" id="employer" />
-                        <Label htmlFor="employer" className="flex items-center gap-2 cursor-pointer">
-                          <Building className="h-4 w-4" />
-                          Employer
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
                   <div>
                     <Label htmlFor="signup-name">Full Name</Label>
                     <Input
@@ -281,100 +238,42 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  {/* Common fields */}
-                  {accountType === 'alumni' && (
-                    <div>
-                      <Label htmlFor="signup-id-number">ID Number</Label>
-                      <Input
-                        id="signup-id-number"
-                        type="text"
-                        placeholder="Your student ID number"
-                        value={idNumber}
-                        onChange={(e) => setIdNumber(e.target.value)}
-                        required
-                      />
-                    </div>
-                  )}
+                  <div>
+                    <Label htmlFor="signup-id-number">ID Number</Label>
+                    <Input
+                      id="signup-id-number"
+                      type="text"
+                      placeholder="Your student ID number"
+                      value={idNumber}
+                      onChange={(e) => setIdNumber(e.target.value)}
+                      required
+                    />
+                  </div>
 
                   <div>
-                    <Label htmlFor="signup-company">
-                      {accountType === 'employer' ? 'Company Name' : 'Current Company (Optional)'}
-                    </Label>
+                    <Label htmlFor="signup-company">Current Company (Optional)</Label>
                     <Input
                       id="signup-company"
                       type="text"
-                      placeholder={accountType === 'employer' ? 'Your company name' : 'Your current company'}
+                      placeholder="Your current company"
                       value={company}
                       onChange={(e) => setCompany(e.target.value)}
-                      required={accountType === 'employer'}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="signup-role">
-                      {accountType === 'employer' ? 'Your Position' : 'Current Role (Optional)'}
-                    </Label>
+                    <Label htmlFor="signup-role">Current Role (Optional)</Label>
                     <Input
                       id="signup-role"
                       type="text"
-                      placeholder={accountType === 'employer' ? 'Your position in the company' : 'Your current position'}
+                      placeholder="Your current position"
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
-                      required={accountType === 'employer'}
                     />
                   </div>
 
-                  {/* Employer-specific fields */}
-                  {accountType === 'employer' && (
-                    <>
-                      <div>
-                        <Label htmlFor="signup-company-size">Company Size</Label>
-                        <Input
-                          id="signup-company-size"
-                          type="text"
-                          placeholder="e.g., 1-10, 11-50, 51-200, etc."
-                          value={companySize}
-                          onChange={(e) => setCompanySize(e.target.value)}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="signup-company-website">Company Website</Label>
-                        <Input
-                          id="signup-company-website"
-                          type="url"
-                          placeholder="https://yourcompany.com"
-                          value={companyWebsite}
-                          onChange={(e) => setCompanyWebsite(e.target.value)}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="signup-contact-phone">Contact Phone</Label>
-                        <Input
-                          id="signup-contact-phone"
-                          type="tel"
-                          placeholder="Your contact phone number"
-                          value={contactPhone}
-                          onChange={(e) => setContactPhone(e.target.value)}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="signup-company-description">Company Description</Label>
-                        <Textarea
-                          id="signup-company-description"
-                          placeholder="Brief description of your company and what you do..."
-                          value={companyDescription}
-                          onChange={(e) => setCompanyDescription(e.target.value)}
-                          className="min-h-[80px]"
-                        />
-                      </div>
-                    </>
-                  )}
-
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : `Sign Up as ${accountType === 'alumni' ? 'Alumni' : 'Employer'}`}
+                    {loading ? "Creating account..." : "Sign Up as Alumni"}
                   </Button>
                 </form>
               </CardContent>

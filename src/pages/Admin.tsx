@@ -185,7 +185,7 @@ const Admin = () => {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: 'admin' | 'employer' | 'alumni') => {
+  const updateUserRole = async (userId: string, newRole: 'admin' | 'alumni') => {
     try {
       const { error } = await supabase
         .from('user_roles')
@@ -258,7 +258,6 @@ const Admin = () => {
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin': return 'destructive';
-      case 'employer': return 'default';
       case 'alumni': return 'secondary';
       default: return 'outline';
     }
@@ -283,7 +282,6 @@ const Admin = () => {
     return null; // Will redirect in useEffect
   }
 
-  const employers = filterUsersByRole('employer');
   const alumni = filterUsersByRole('alumni');
   const admins = filterUsersByRole('admin');
 
@@ -307,7 +305,7 @@ const Admin = () => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending Verifications</CardTitle>
@@ -339,16 +337,6 @@ const Admin = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Employers</CardTitle>
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{employers.length}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Admins</CardTitle>
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -375,12 +363,10 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="pending" className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="pending">Pending</TabsTrigger>
                 <TabsTrigger value="all">All Users</TabsTrigger>
                 <TabsTrigger value="alumni">Alumni</TabsTrigger>
-                <TabsTrigger value="employer">Employers</TabsTrigger>
-                <TabsTrigger value="admin">Admins</TabsTrigger>
                 <TabsTrigger value="jobs">Job Postings</TabsTrigger>
               </TabsList>
 
@@ -399,14 +385,6 @@ const Admin = () => {
                 <UserList users={alumni} onRoleUpdate={updateUserRole} />
               </TabsContent>
 
-              <TabsContent value="employer" className="space-y-4">
-                <UserList users={employers} onRoleUpdate={updateUserRole} />
-              </TabsContent>
-
-              <TabsContent value="admin" className="space-y-4">
-                <UserList users={admins} onRoleUpdate={updateUserRole} />
-              </TabsContent>
-
               <TabsContent value="jobs" className="space-y-4">
                 <JobPostingsList 
                   jobPostings={jobPostings} 
@@ -423,7 +401,7 @@ const Admin = () => {
 
 interface UserListProps {
   users: UserWithRole[];
-  onRoleUpdate: (userId: string, newRole: 'admin' | 'employer' | 'alumni') => void;
+  onRoleUpdate: (userId: string, newRole: 'admin' | 'alumni') => void;
 }
 
 interface PendingUsersListProps {
@@ -493,7 +471,6 @@ const UserList = ({ users, onRoleUpdate }: UserListProps) => {
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin': return 'destructive';
-      case 'employer': return 'default';
       case 'alumni': return 'secondary';
       default: return 'outline';
     }
@@ -532,14 +509,6 @@ const UserList = ({ users, onRoleUpdate }: UserListProps) => {
                 disabled={user.user_role === 'alumni'}
               >
                 Alumni
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onRoleUpdate(user.profile.user_id, 'employer')}
-                disabled={user.user_role === 'employer'}
-              >
-                Employer
               </Button>
               <Button
                 variant="outline"

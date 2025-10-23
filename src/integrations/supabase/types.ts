@@ -252,10 +252,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_first_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      create_first_admin: { Args: never; Returns: undefined }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -267,18 +264,15 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       verify_user: {
         Args: { approve: boolean; target_user_id: string }
         Returns: undefined
       }
     }
     Enums: {
-      account_type: "alumni" | "employer"
-      app_role: "admin" | "employer" | "alumni"
+      account_type: "alumni"
+      app_role: "admin" | "alumni"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -406,8 +400,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      account_type: ["alumni", "employer"],
-      app_role: ["admin", "employer", "alumni"],
+      account_type: ["alumni"],
+      app_role: ["admin", "alumni"],
     },
   },
 } as const
