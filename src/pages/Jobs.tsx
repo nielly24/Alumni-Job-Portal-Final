@@ -64,6 +64,13 @@ const Jobs = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
   const fetchJobs = async () => {
     try {
       setLoading(true);
