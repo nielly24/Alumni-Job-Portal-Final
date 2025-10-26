@@ -116,6 +116,21 @@ const Auth = () => {
     }
   };
 
+  const handleIdNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/[^\d]/g, ''); // Remove non-digits
+    
+    if (value.length > 7) {
+      value = value.slice(0, 7); // Max 7 digits (2+5)
+    }
+    
+    // Add dash after 2 digits
+    if (value.length > 2) {
+      value = value.slice(0, 2) + '-' + value.slice(2);
+    }
+    
+    setIdNumber(value);
+  };
+
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -308,14 +323,15 @@ const Auth = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="signup-id-number">ID Number</Label>
+                    <Label htmlFor="signup-id-number">Alumni ID Number</Label>
                     <Input
                       id="signup-id-number"
                       type="text"
-                      placeholder="Your student ID number"
+                      placeholder="23-02343"
                       value={idNumber}
-                      onChange={(e) => setIdNumber(e.target.value)}
+                      onChange={handleIdNumberChange}
                       required
+                      maxLength={8}
                     />
                   </div>
 
