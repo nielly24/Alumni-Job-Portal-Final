@@ -21,6 +21,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -35,8 +36,45 @@ const Auth = () => {
     checkAuth();
   }, [navigate]);
 
+  const validatePassword = (pwd: string): boolean => {
+    if (pwd.length < 8) {
+      setPasswordError("Password must be at least 8 characters long");
+      return false;
+    }
+    if (!/[a-zA-Z]/.test(pwd)) {
+      setPasswordError("Password must contain at least one letter");
+      return false;
+    }
+    if (!/\d/.test(pwd)) {
+      setPasswordError("Password must contain at least one number");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    if (newPassword) {
+      validatePassword(newPassword);
+    } else {
+      setPasswordError("");
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validatePassword(password)) {
+      toast({
+        title: "Invalid Password",
+        description: passwordError,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -302,9 +340,10 @@ const Auth = () => {
                         type={showPassword ? "text" : "password"}
                         placeholder="Create a strong password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={handlePasswordChange}
                         required
-                        minLength={6}
+                        minLength={8}
+                        className={passwordError ? "border-destructive" : ""}
                       />
                       <Button
                         type="button"
@@ -320,6 +359,12 @@ const Auth = () => {
                         )}
                       </Button>
                     </div>
+                    {passwordError && (
+                      <p className="text-sm text-destructive mt-1">{passwordError}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Must be at least 8 characters with letters and numbers
+                    </p>
                   </div>
 
                   <div>
