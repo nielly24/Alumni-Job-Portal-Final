@@ -7,7 +7,7 @@ import { supabase } from '../supabaseClient'; // Make sure this path is correct
 // Type definition for the applicant data
 type Applicant = {
   id: number;
-  motivation: string;
+  cover_letter: string; 
   profiles: {
     full_name: string;
     email: string;
@@ -32,24 +32,18 @@ const ViewApplicants = () => {
         setLoading(true);
         setError(null);
         
-        // --- THIS IS THE FIX ---
-        // Corrected the table name to match your database.
-        const applicationsTableName = 'job_applications';
-
         const { data, error: fetchError } = await supabase
-          .from(applicationsTableName)
+          .from('job_applications')
+          // --- FIX: Removed comments from this query block ---
           .select(`
             id,
-            motivation,
+            cover_letter,
             profiles!inner ( full_name, email ),
             job_postings!inner ( title )
           `)
           .eq('job_id', jobId);
         
-        if (fetchError) {
-          console.error("Supabase fetch error:", fetchError);
-          throw fetchError;
-        }
+        if (fetchError) { throw fetchError; }
 
         if (data && data.length > 0) {
           setApplicants(data);
@@ -67,13 +61,8 @@ const ViewApplicants = () => {
     fetchApplicants();
   }, [jobId]);
 
-  if (loading) {
-    return <div className="text-center p-10">Loading applicants...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center p-10 text-red-500">{error}</div>;
-  }
+  if (loading) { return <div className="text-center p-10">Loading applicants...</div>; }
+  if (error) { return <div className="text-center p-10 text-red-500">{error}</div>; }
 
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -92,9 +81,9 @@ const ViewApplicants = () => {
                   {applicant.profiles[0].email}
                 </a>
                 <p className="text-gray-600 mt-4">
-                  <span className="font-semibold">Motivation:</span>
+                  <span className="font-semibold">Cover Letter:</span>
                 </p>
-                <p className="bg-gray-50 p-3 rounded-md mt-1 whitespace-pre-wrap">{applicant.motivation}</p>
+                <p className="bg-gray-50 p-3 rounded-md mt-1 whitespace-pre-wrap">{applicant.cover_letter}</p>
               </div>
             )
           ))}
