@@ -41,7 +41,7 @@ const ViewApplicants = () => {
           cover_letter,
           status,
           profiles!fk_applicant ( full_name, email ),
-          job_postings!fk_job_posting ( title )
+          job_postings!fk_job ( title )
         `)
         .eq('job_id', jobId);
       
