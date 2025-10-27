@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, FileText, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { User } from "@supabase/supabase-js"; // Import the User type
 
 interface JobPosting {
   id: string;
@@ -21,31 +22,31 @@ const ApplyJob = () => {
   const { id } = useParams();
   const [job, setJob] = useState<JobPosting | null>(null);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null); // Use the correct type for user
   const [coverLetter, setCoverLetter] = useState("");
   const [resumeUrl, setResumeUrl] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to apply for jobs",
+        });
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+    };
+
     checkAuth();
     if (id) {
       fetchJob();
     }
   }, [id]);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to apply for jobs",
-      });
-      navigate("/auth");
-      return;
-    }
-    setUser(session.user);
-  };
 
   const fetchJob = async () => {
     try {
@@ -76,15 +77,29 @@ const ApplyJob = () => {
     }
   };
 
+  // --- THIS ENTIRE FUNCTION HAS BEEN REPLACED ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !id) return;
-
-    // --- FIX #1: LOG THE USER ID ---
-    // This will tell us the exact user ID being sent to the database.
-    console.log('--- DEBUG: Submitting application for user ID:', user.id);
-
     setLoading(true);
+
+    // Re-fetch the session to ensure we have the latest user data.
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+    // If there's no session or an error, stop the process.
+    if (sessionError || !session) {
+      toast({
+        title: "Authentication Error",
+        description: "Your session has expired. Please log in again.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      navigate('/auth');
+      return;
+    }
+    
+    const currentUser = session.user;
+    
+    console.log('--- DEBUG: Submitting application for user ID:', currentUser.id);
 
     try {
       // Check if user has already applied
@@ -92,7 +107,7 @@ const ApplyJob = () => {
         .from('job_applications')
         .select('id')
         .eq('job_id', id)
-        .eq('applicant_id', user.id)
+        .eq('applicant_id', currentUser.id)
         .single();
 
       if (existingApplication) {
@@ -101,24 +116,24 @@ const ApplyJob = () => {
           description: "You have already applied for this job",
           variant: "destructive",
         });
+        setLoading(false); // Make sure to stop loading here
         navigate(`/job/${id}`);
         return;
       }
 
       const applicationData = {
         job_id: id,
-        applicant_id: user.id,
+        applicant_id: currentUser.id,
         cover_letter: coverLetter || null,
         resume_uri: resumeUrl || null,
       };
 
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('job_applications')
         .insert([applicationData]);
 
-      if (error) {
-        // --- FIX #2: LOG THE SUPABASE ERROR ---
-        console.error("Error submitting application:", error);
+      if (insertError) {
+        console.error("Error submitting application:", insertError);
         toast({
           title: "Error",
           description: "Failed to submit application. Please try again.",
@@ -132,7 +147,6 @@ const ApplyJob = () => {
         navigate(`/job/${id}`);
       }
     } catch (error) {
-      // --- FIX #3: LOG THE CATCH BLOCK ERROR ---
       console.error("An unexpected error occurred:", error);
       toast({
         title: "Error",
@@ -144,23 +158,12 @@ const ApplyJob = () => {
     }
   };
 
-  if (!user) {
+  if (!user || !job) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Checking authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!job) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading job details...</p>
+          <p>Loading...</p>
         </div>
       </div>
     );
@@ -168,7 +171,6 @@ const ApplyJob = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <header className="border-b bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
@@ -186,7 +188,6 @@ const ApplyJob = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
-          {/* Job Summary */}
           <Card>
             <CardHeader>
               <CardTitle>Applying for:</CardTitle>
@@ -199,7 +200,6 @@ const ApplyJob = () => {
             </CardHeader>
           </Card>
 
-          {/* Application Form */}
           <Card>
             <CardHeader>
               <CardTitle>Your Application</CardTitle>
