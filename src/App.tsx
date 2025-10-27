@@ -17,7 +17,7 @@ import AlumniDirectory from "./pages/AlumniDirectory";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "@/pages/ResetPassword";
-import ViewApplicants from "./pages/ViewApplicants"; // 1. IMPORT THE NEW PAGE COMPONENT
+import ViewApplicants from "./pages/ViewApplicants"; 
 
 const queryClient = new QueryClient();
 
@@ -34,7 +34,6 @@ const App = () => (
           <Route path="/job/:id" element={<JobDetails />} />
           <Route path="/job/:id/apply" element={<ApplyJob />} />
 
-          {/* 2. ADDED THE NEW ROUTE FOR VIEWING APPLICANTS */}
           <Route path="/jobs/:jobId/applicants" element={<ViewApplicants />} />
 
           <Route path="/post-job" element={<PostJob />} />
@@ -42,9 +41,17 @@ const App = () => (
           <Route path="/profile/:userId" element={<UserProfile />} />
           <Route path="/alumni" element={<AlumniDirectory />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/auth/reset" element={<ResetPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
           
+          {/* --- CONSOLIDATED RESET PASSWORD ROUTES (THE FIX) --- */}
+          {/* This route catches the direct link from the Supabase email */}
+          <Route path="/auth/reset" element={<ResetPassword />} />
+          
+          {/* This route catches any internal app redirects for the reset page */}
+          <Route path="/reset-password" element={<ResetPassword />} /> 
+          
+          {/* This catches the /auth/v1/verify callback with parameters */}
+          <Route path="/auth/verify" element={<ResetPassword />} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
