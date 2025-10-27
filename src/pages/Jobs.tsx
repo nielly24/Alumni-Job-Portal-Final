@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Building, Clock, Briefcase, Search, Plus } from "lucide-react";
+// 1. IMPORT THE 'Users' ICON
+import { MapPin, Building, Clock, Briefcase, Search, Plus, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
@@ -127,7 +128,7 @@ const Jobs = () => {
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.company.toLowerCase().includes(searchTerm.toLowerCase());
+                          job.company.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLocation = !locationFilter || job.location.toLowerCase().includes(locationFilter.toLowerCase());
     const matchesType = !typeFilter || typeFilter === "all" || job.type === typeFilter;
     return matchesSearch && matchesLocation && matchesType;
@@ -294,12 +295,24 @@ const Jobs = () => {
                       >
                         View Details
                       </Button>
-                      {user && (
+                      {user && user.id !== job.user_id && ( // Make sure user can't apply to their own job
                         <Button 
                           variant="outline"
                           onClick={() => navigate(`/job/${job.id}/apply`)}
                         >
                           Apply Now
+                        </Button>
+                      )}
+
+                      {/* 2. ADD THIS CONDITIONAL BLOCK */}
+                      {/* It checks if a user is logged in AND if their ID matches the job's user_id */}
+                      {user && user.id === job.user_id && (
+                        <Button
+                          onClick={() => navigate(`/jobs/${job.id}/applicants`)}
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                        >
+                          <Users className="mr-2 h-4 w-4" />
+                          View Applicants
                         </Button>
                       )}
                     </div>
