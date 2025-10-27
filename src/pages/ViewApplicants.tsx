@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { supabase } from '../supabaseClient'; // Make sure this path is correct
+import { supabase } from '../supabaseClient'; 
 
 // Type definition for the applicant data
 type Applicant = {
@@ -35,12 +35,13 @@ const ViewApplicants = () => {
       
       const { data, error: fetchError } = await supabase
         .from('job_applications')
-        // --- FIX: Removed comments from this query block ---
+        // --- FINAL QUERY FIX ---
+        // We are now explicitly joining the 'profiles' table using the correct foreign key (applicant_id -> user_id)
         .select(`
           id,
           cover_letter,
           status,
-          profiles!inner ( full_name, email ),
+          profiles!job_applications_applicant_id_fkey!inner ( full_name, email ),
           job_postings!fk_job_posting ( title )
         `)
         .eq('job_id', jobId);
