@@ -56,40 +56,39 @@ const ViewApplicants = () => {
 
   // Function to fetch applicants
   const fetchApplicants = async () => {
-    if (!jobId) return;
+  if (!jobId) return;
 
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const { data, error: fetchError } = await supabase
-        .from('job_applications')
-        .select(`
-          id,
-          cover_letter,
-          status,
-          resume_uri,
-          profiles!fk_applicant ( full_name, email ),
-          
-          -- FIX 2: Request the job owner's ID
-          job_postings!fk_job_link ( title, user_id ) 
-        `)
-        .eq('job_id', jobId);
-      
-      if (fetchError) { throw fetchError; }
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const { data, error: fetchError } = await supabase
+      .from('job_applications')
+      // --- FIX: Removed the comment that caused the parser error ---
+      .select(`
+        id,
+        cover_letter,
+        status,
+        resume_uri,
+        profiles!fk_applicant ( full_name, email ),
+        job_postings!fk_job_link ( title, user_id ) 
+      `)
+      .eq('job_id', jobId);
+    
+    if (fetchError) { throw fetchError; }
 
-      if (data && data.length > 0) {
-        setApplicants(data as unknown as Applicant[]);
-        setJobTitle((data[0] as unknown as Applicant).job_postings.title);
-      }
-
-    } catch (err: any) {
-      setError('Failed to fetch applicants. Please try again.');
-      console.error("Error details:", err);
-    } finally {
-      setLoading(false);
+    if (data && data.length > 0) {
+      setApplicants(data as unknown as Applicant[]);
+      setJobTitle((data[0] as unknown as Applicant).job_postings.title);
     }
-  };
+
+  } catch (err: any) {
+    setError('Failed to fetch applicants. Please try again.');
+    console.error("Error details:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchUserRole();
