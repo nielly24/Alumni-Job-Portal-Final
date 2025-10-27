@@ -133,42 +133,9 @@ const Profile = () => {
       if (employmentError) throw employmentError;
 
       // If no employment history exists, create dummy data
-      if (!employmentData || employmentData.length === 0) {
-        const dummyEmployment = [
-          {
-            user_id: userId,
-            company: "Tech Solutions Inc.",
-            position: "Senior Software Engineer",
-            employment_type: "full-time",
-            location: "San Francisco, CA",
-            start_date: "2022-01-15",
-            end_date: null,
-            is_current: true,
-            description: "Leading development of microservices architecture for enterprise applications. Working with React, Node.js, and AWS cloud services."
-          },
-          {
-            user_id: userId,
-            company: "StartupCorp",
-            position: "Full Stack Developer",
-            employment_type: "full-time",
-            location: "Remote",
-            start_date: "2020-06-01",
-            end_date: "2021-12-31",
-            is_current: false,
-            description: "Developed web applications using React and Python Flask. Built RESTful APIs and managed PostgreSQL databases."
-          },
-          {
-            user_id: userId,
-            company: "Innovation Labs",
-            position: "Software Engineering Intern",
-            employment_type: "internship",
-            location: "Palo Alto, CA",
-            start_date: "2019-06-01",
-            end_date: "2019-08-31",
-            is_current: false,
-            description: "Worked on mobile app development using React Native. Contributed to improving app performance and user experience."
-          }
-        ];
+
+      
+      
 
         const { data: newEmploymentData, error: createEmploymentError } = await supabase
           .from('employment_history')
