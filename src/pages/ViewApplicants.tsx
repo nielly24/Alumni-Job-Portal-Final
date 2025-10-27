@@ -35,8 +35,7 @@ const ViewApplicants = () => {
       
       const { data, error: fetchError } = await supabase
         .from('job_applications')
-        // --- FINAL QUERY FIX ---
-        // We are now explicitly joining the 'profiles' table using the correct foreign key (applicant_id -> user_id)
+        // --- FINAL FIX: Use the standard, reliable foreign key name ---
         .select(`
           id,
           cover_letter,
