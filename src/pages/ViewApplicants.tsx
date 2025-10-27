@@ -2,21 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { supabase } from '../supabaseClient'; // Adjust path if necessary
+import { supabase } from '../supabaseClient'; // Make sure this path is correct
 
-// Define a type for the applicant data we expect to receive
+// 1. UPDATED TYPE: 'profiles' and 'job_postings' are now correctly typed as arrays.
 type Applicant = {
   id: number;
   motivation: string;
-  profiles: { // This comes from the joined 'profiles' table
+  profiles: {
     full_name: string;
     email: string;
-    // Add any other profile fields you want to display, e.g., avatar_url, bio
-  };
+  }[]; // Changed to an array of objects
+  job_postings: {
+    title: string;
+  }[]; // Changed to an array of objects
 };
 
 const ViewApplicants = () => {
-  // The 'jobId' will come from the URL, e.g., /jobs/5/applicants
   const { jobId } = useParams<{ jobId: string }>(); 
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [jobTitle, setJobTitle] = useState('');
@@ -30,35 +31,34 @@ const ViewApplicants = () => {
       try {
         setLoading(true);
         setError(null);
+        
+        const applicationsTableName = 'applications';
 
-        // Fetch applications and join with the user's profile information
-        // This query gets all applications for the given job_id
-        // and for each application, it fetches all columns (*) from the related 'profiles' table
-        // and the 'title' from the related 'jobs' table.
         const { data, error: fetchError } = await supabase
-          .from('applications')
+          .from(applicationsTableName)
           .select(`
             id,
             motivation,
-            profiles ( full_name, email ),
-            jobs ( title )
+            profiles!inner ( full_name, email ),
+            job_postings!inner ( title )
           `)
           .eq('job_id', jobId);
-
+        
         if (fetchError) {
+          console.error("Supabase fetch error:", fetchError);
           throw fetchError;
         }
 
         if (data && data.length > 0) {
-          // @ts-ignore
+          // The 'data' type now matches the updated 'Applicant[]' type.
           setApplicants(data);
-          // @ts-ignore
-          setJobTitle(data[0].jobs.title); // Set job title from the first applicant's data
+          // 2. UPDATED DATA ACCESS: Access the first element of the array.
+          setJobTitle(data[0].job_postings[0].title);
         }
 
       } catch (err: any) {
         setError('Failed to fetch applicants. Please try again.');
-        console.error(err);
+        console.error("Error details:", err);
       } finally {
         setLoading(false);
       }
@@ -85,16 +85,20 @@ const ViewApplicants = () => {
       ) : (
         <div className="space-y-6 mt-4">
           {applicants.map((applicant) => (
-            <div key={applicant.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">{applicant.profiles.full_name}</h2>
-              <a href={`mailto:${applicant.profiles.email}`} className="text-blue-500 hover:underline text-sm">
-                {applicant.profiles.email}
-              </a>
-              <p className="text-gray-600 mt-4">
-                <span className="font-semibold">Motivation:</span>
-              </p>
-              <p className="bg-gray-50 p-3 rounded-md mt-1 whitespace-pre-wrap">{applicant.motivation}</p>
-            </div>
+            // 3. UPDATED JSX: Access the first profile from the 'profiles' array.
+            // We add a check to make sure the profile exists before trying to render it.
+            applicant.profiles && applicant.profiles.length > 0 && (
+              <div key={applicant.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-800">{applicant.profiles[0].full_name}</h2>
+                <a href={`mailto:${applicant.profiles[0].email}`} className="text-blue-500 hover:underline text-sm">
+                  {applicant.profiles[0].email}
+                </a>
+                <p className="text-gray-600 mt-4">
+                  <span className="font-semibold">Motivation:</span>
+                </p>
+                <p className="bg-gray-50 p-3 rounded-md mt-1 whitespace-pre-wrap">{applicant.motivation}</p>
+              </div>
+            )
           ))}
         </div>
       )}
