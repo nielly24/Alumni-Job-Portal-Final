@@ -41,7 +41,8 @@ const App = () => (
           <Route path="/profile/:userId" element={<UserProfile />} />
           <Route path="/alumni" element={<AlumniDirectory />} />
           <Route path="/admin" element={<Admin />} />
-          
+          <Route path="/reset-password" element={<ResetPassword />} />
+
           {/* --- CONSOLIDATED RESET PASSWORD ROUTES (THE FIX) --- */}
           {/* This route catches the direct link from the Supabase email */}
           <Route path="/auth/reset" element={<ResetPassword />} />
