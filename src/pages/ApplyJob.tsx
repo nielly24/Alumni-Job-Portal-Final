@@ -105,7 +105,9 @@ const ApplyJob = () => {
         job_id: id,
         applicant_id: user.id,
         cover_letter: coverLetter || null,
-        resume_url: resumeUrl || null,
+        // --- THIS IS THE FIX ---
+        // Changed 'resume_url' to 'resume_uri' to match your database
+        resume_uri: resumeUrl || null,
       };
 
       const { error } = await supabase
@@ -113,6 +115,8 @@ const ApplyJob = () => {
         .insert([applicationData]);
 
       if (error) {
+        // --- ADDED THIS CONSOLE LOG ---
+        console.error("Error submitting application:", error);
         toast({
           title: "Error",
           description: "Failed to submit application. Please try again.",
@@ -126,6 +130,8 @@ const ApplyJob = () => {
         navigate(`/job/${id}`);
       }
     } catch (error) {
+      // --- ADDED THIS CONSOLE LOG ---
+      console.error("An unexpected error occurred:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
