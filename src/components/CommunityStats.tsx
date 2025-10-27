@@ -15,16 +15,28 @@ const CommunityStats = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Get alumni count
-        const { count: alumniCount } = await supabase
-          .from('profiles')
+        // --- FIX 1: Query for ALUMNI Count ---
+        // Alumni status is determined by the user_roles table, not a column in 'profiles'.
+        const { count: alumniCount, error: alumniError } = await supabase
+          .from('user_roles')
           .select('*', { count: 'exact', head: true })
-          .eq('account_type', 'alumni');
+          .eq('role', 'alumni'); // Assuming 'role' is the column name in user_roles
+
+        if (alumniError) throw alumniError;
+
+        // --- FIX 2: Query for TOTAL Users Count ---
+        // Total count is the total number of profiles.
+        const { count: totalCount, error: totalError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+
+        if (totalError) throw totalError;
 
         setStats({
           alumni: alumniCount || 0,
-          total: alumniCount || 0
+          total: totalCount || 0 // Use the dedicated total count
         });
+
       } catch (error) {
         console.error('Error fetching stats:', error);
       } finally {
