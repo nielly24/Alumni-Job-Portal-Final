@@ -96,26 +96,27 @@ const ViewApplicants = () => {
   }, [jobId]);
 
   const handleUpdateStatus = async (applicationId: number, newStatus: 'Accepted' | 'Rejected') => {
-    // Check if the current user is authorized before proceeding
-    if (!currentUser) return; // Should not happen if page loaded correctly
-    
+    // Determine the exact string the database expects
+    const dbStatus = newStatus === 'Accepted' ? 'Approved' : 'Denied';
+
     // Optimistically update the UI first
     setApplicants(applicants.map(app => 
-      app.id === applicationId ? { ...app, status: newStatus } : app
+      app.id === applicationId ? { ...app, status: dbStatus } : app
     ));
 
     // Then, update the database
     const { error } = await supabase
       .from('job_applications')
-      .update({ status: newStatus })
+      .update({ status: dbStatus }) // Use the corrected status string
       .eq('id', applicationId);
 
     if (error) {
       console.error("Error updating status:", error);
-      alert('Failed to update status. Please try again. Check your RLS UPDATE policy.');
-      fetchApplicants(); // Re-fetch to get the correct state
+      // If the update fails (e.g., due to RLS), show an alert and re-fetch the correct state
+      alert(`Failed to update status to ${newStatus}. Please check your RLS policy or the allowed database status values.`);
+      fetchApplicants(); 
     }
-  };
+};
 
   if (loading || !currentUser) { return <div className="text-center p-10">Loading applicants...</div>; }
   if (error) { return <div className="text-center p-10 text-red-500">{error}</div>; }
