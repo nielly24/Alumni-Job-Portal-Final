@@ -18,6 +18,9 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "@/pages/ResetPassword";
 import ViewApplicants from "./pages/ViewApplicants"; 
+// --- CONFIRMING IMPORTS ---
+import ViewMyApplication from "./pages/ViewMyApplication"; 
+import MyApplicationsList from "./pages/MyApplicationsList"; 
 
 const queryClient = new QueryClient();
 
@@ -34,23 +37,24 @@ const App = () => (
           <Route path="/job/:id" element={<JobDetails />} />
           <Route path="/job/:id/apply" element={<ApplyJob />} />
 
+          {/* Employer Routes */}
           <Route path="/jobs/:jobId/applicants" element={<ViewApplicants />} />
+
+          {/* APPLICANT MONITORING ROUTES (NEW) */}
+          {/* List of all applications for the logged-in user */}
+          <Route path="/my-applications" element={<MyApplicationsList />} /> 
+          {/* Detailed status page for a single application */}
+          <Route path="/my-application/:jobId" element={<ViewMyApplication />} />
 
           <Route path="/post-job" element={<PostJob />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:userId" element={<UserProfile />} />
           <Route path="/alumni" element={<AlumniDirectory />} />
           <Route path="/admin" element={<Admin />} />
+          
+          {/* Reset Password Routes */}
           <Route path="/reset-password" element={<ResetPassword />} />
-
-          {/* --- CONSOLIDATED RESET PASSWORD ROUTES (THE FIX) --- */}
-          {/* This route catches the direct link from the Supabase email */}
           <Route path="/auth/reset" element={<ResetPassword />} />
-          
-          {/* This route catches any internal app redirects for the reset page */}
-          <Route path="/reset-password" element={<ResetPassword />} /> 
-          
-          {/* This catches the /auth/v1/verify callback with parameters */}
           <Route path="/auth/verify" element={<ResetPassword />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
