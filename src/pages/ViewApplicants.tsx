@@ -4,17 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient'; // Make sure this path is correct
 
-// 1. UPDATED TYPE: 'profiles' and 'job_postings' are now correctly typed as arrays.
+// Type definition for the applicant data
 type Applicant = {
   id: number;
   motivation: string;
   profiles: {
     full_name: string;
     email: string;
-  }[]; // Changed to an array of objects
+  }[];
   job_postings: {
     title: string;
-  }[]; // Changed to an array of objects
+  }[];
 };
 
 const ViewApplicants = () => {
@@ -32,7 +32,9 @@ const ViewApplicants = () => {
         setLoading(true);
         setError(null);
         
-        const applicationsTableName = 'applications';
+        // --- THIS IS THE FIX ---
+        // Corrected the table name to match your database.
+        const applicationsTableName = 'job_applications';
 
         const { data, error: fetchError } = await supabase
           .from(applicationsTableName)
@@ -50,9 +52,7 @@ const ViewApplicants = () => {
         }
 
         if (data && data.length > 0) {
-          // The 'data' type now matches the updated 'Applicant[]' type.
           setApplicants(data);
-          // 2. UPDATED DATA ACCESS: Access the first element of the array.
           setJobTitle(data[0].job_postings[0].title);
         }
 
@@ -85,8 +85,6 @@ const ViewApplicants = () => {
       ) : (
         <div className="space-y-6 mt-4">
           {applicants.map((applicant) => (
-            // 3. UPDATED JSX: Access the first profile from the 'profiles' array.
-            // We add a check to make sure the profile exists before trying to render it.
             applicant.profiles && applicant.profiles.length > 0 && (
               <div key={applicant.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-800">{applicant.profiles[0].full_name}</h2>
