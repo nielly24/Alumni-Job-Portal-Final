@@ -8,6 +8,7 @@ import { supabase } from '../supabaseClient'; // Make sure this path is correct
 type Applicant = {
   id: number;
   cover_letter: string; 
+  status: string;
   profiles: {
     full_name: string;
     email: string;
@@ -24,45 +25,72 @@ const ViewApplicants = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchApplicants = async () => {
-      if (!jobId) return;
+  // Function to fetch applicants
+  const fetchApplicants = async () => {
+    if (!jobId) return;
 
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const { data, error: fetchError } = await supabase
-          .from('job_applications')
-          // --- FIX: Removed comments from this query block ---
-          .select(`
-            id,
-            cover_letter,
-            profiles!inner ( full_name, email ),
-            job_postings!inner ( title )
-          `)
-          .eq('job_id', jobId);
-        
-        if (fetchError) { throw fetchError; }
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { data, error: fetchError } = await supabase
+        .from('job_applications')
+        // --- FIX: Removed comments from this query block ---
+        .select(`
+          id,
+          cover_letter,
+          status,
+          profiles!inner ( full_name, email ),
+          job_postings!fk_job_posting ( title )
+        `)
+        .eq('job_id', jobId);
+      
+      if (fetchError) { throw fetchError; }
 
-        if (data && data.length > 0) {
-          setApplicants(data);
-          setJobTitle(data[0].job_postings[0].title);
-        }
-
-      } catch (err: any) {
-        setError('Failed to fetch applicants. Please try again.');
-        console.error("Error details:", err);
-      } finally {
-        setLoading(false);
+      if (data && data.length > 0) {
+        setApplicants(data);
+        setJobTitle(data[0].job_postings[0].title);
       }
-    };
 
+    } catch (err: any) {
+      setError('Failed to fetch applicants. Please try again.');
+      console.error("Error details:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchApplicants();
   }, [jobId]);
 
+  const handleUpdateStatus = async (applicationId: number, newStatus: 'Accepted' | 'Rejected') => {
+    setApplicants(applicants.map(app => 
+      app.id === applicationId ? { ...app, status: newStatus } : app
+    ));
+
+    const { error } = await supabase
+      .from('job_applications')
+      .update({ status: newStatus })
+      .eq('id', applicationId);
+
+    if (error) {
+      console.error("Error updating status:", error);
+      alert('Failed to update status. Please try again.');
+      fetchApplicants();
+    }
+  };
+
   if (loading) { return <div className="text-center p-10">Loading applicants...</div>; }
   if (error) { return <div className="text-center p-10 text-red-500">{error}</div>; }
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'Accepted': return 'bg-green-100 text-green-800';
+      case 'Rejected': return 'bg-red-100 text-red-800';
+      default: return 'bg-yellow-100 text-yellow-800';
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -76,14 +104,37 @@ const ViewApplicants = () => {
           {applicants.map((applicant) => (
             applicant.profiles && applicant.profiles.length > 0 && (
               <div key={applicant.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-800">{applicant.profiles[0].full_name}</h2>
-                <a href={`mailto:${applicant.profiles[0].email}`} className="text-blue-500 hover:underline text-sm">
-                  {applicant.profiles[0].email}
-                </a>
-                <p className="text-gray-600 mt-4">
-                  <span className="font-semibold">Cover Letter:</span>
-                </p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-800">{applicant.profiles[0].full_name}</h2>
+                    <a href={`mailto:${applicant.profiles[0].email}`} className="text-blue-500 hover:underline text-sm">
+                      {applicant.profiles[0].email}
+                    </a>
+                  </div>
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusBadgeClass(applicant.status)}`}>
+                    {applicant.status}
+                  </span>
+                </div>
+                
+                <p className="text-gray-600 mt-4"><span className="font-semibold">Cover Letter:</span></p>
                 <p className="bg-gray-50 p-3 rounded-md mt-1 whitespace-pre-wrap">{applicant.cover_letter}</p>
+                
+                <div className="flex gap-4 mt-4 border-t pt-4">
+                  <button 
+                    onClick={() => handleUpdateStatus(applicant.id, 'Accepted')} 
+                    disabled={applicant.status === 'Accepted'}
+                    className="flex-1 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed transition"
+                  >
+                    Accept
+                  </button>
+                  <button 
+                    onClick={() => handleUpdateStatus(applicant.id, 'Rejected')} 
+                    disabled={applicant.status === 'Rejected'}
+                    className="flex-1 bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed transition"
+                  >
+                    Reject
+                  </button>
+                </div>
               </div>
             )
           ))}
