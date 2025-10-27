@@ -9,7 +9,8 @@ type Applicant = {
   id: number;
   cover_letter: string; 
   status: string;
-  // This type definition must be precise to pass the parser
+  // --- FIX: Add resume_uri to the type definition ---
+  resume_uri: string | null;
   profiles: {
     full_name: string;
     email: string;
@@ -41,6 +42,7 @@ const ViewApplicants = () => {
           id,
           cover_letter,
           status,
+          resume_uri,  // --- FIX: Request the resume_uri from the database ---
           profiles!fk_applicant ( full_name, email ),
           job_postings!fk_job_link ( title )
         `)
@@ -51,9 +53,6 @@ const ViewApplicants = () => {
       // We must cast the data here to match the Applicant[] type structure
       if (data && data.length > 0) {
         setApplicants(data as unknown as Applicant[]);
-        // The original code was accessing an array [0] element twice.
-        // After correcting the type and casting, we access the nested object directly.
-        // We will simplify the data access in the return block below.
         setJobTitle((data[0] as unknown as Applicant).job_postings.title);
       }
 
@@ -121,6 +120,21 @@ const ViewApplicants = () => {
                 </span>
               </div>
               
+              {/* --- FIX: Displaying the full Resume URL text --- */}
+              {applicant.resume_uri && (
+                  <div className="mt-4 pb-2">
+                      <p className="font-semibold text-gray-800">Resume URL:</p>
+                      <a 
+                          href={applicant.resume_uri} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-blue-500 hover:underline text-sm break-all"
+                      >
+                          {applicant.resume_uri} {/* Shows the full URL text */}
+                      </a>
+                  </div>
+              )}
+
               <p className="text-gray-600 mt-4"><span className="font-semibold">Cover Letter:</span></p>
               <p className="bg-gray-50 p-3 rounded-md mt-1 whitespace-pre-wrap">{applicant.cover_letter}</p>
               
