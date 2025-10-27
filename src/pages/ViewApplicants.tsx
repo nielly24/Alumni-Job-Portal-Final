@@ -35,12 +35,12 @@ const ViewApplicants = () => {
       
       const { data, error: fetchError } = await supabase
         .from('job_applications')
-        // --- FINAL FIX: Use the standard, reliable foreign key name ---
+        // --- CLEANED QUERY: Removed all comments and line breaks ---
         .select(`
           id,
           cover_letter,
           status,
-          profiles!job_applications_applicant_id_fkey ( full_name, email ),
+          profiles!fk_applicant ( full_name, email ),
           job_postings!fk_job_posting ( title )
         `)
         .eq('job_id', jobId);
