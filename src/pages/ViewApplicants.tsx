@@ -9,13 +9,14 @@ type Applicant = {
   id: number;
   cover_letter: string; 
   status: string;
+  // This type definition must be precise to pass the parser
   profiles: {
     full_name: string;
     email: string;
-  }[];
+  }; 
   job_postings: {
     title: string;
-  }[];
+  };
 };
 
 const ViewApplicants = () => {
@@ -33,23 +34,27 @@ const ViewApplicants = () => {
       setLoading(true);
       setError(null);
       
+      // The select statement forces the return structure into the Applicant type
       const { data, error: fetchError } = await supabase
         .from('job_applications')
-        // --- CLEANED QUERY: Removed all comments and line breaks ---
         .select(`
           id,
           cover_letter,
           status,
           profiles!fk_applicant ( full_name, email ),
-          job_postings!fk_job ( title )
+          job_postings!fk_job_link ( title )
         `)
         .eq('job_id', jobId);
       
       if (fetchError) { throw fetchError; }
 
+      // We must cast the data here to match the Applicant[] type structure
       if (data && data.length > 0) {
-        setApplicants(data);
-        setJobTitle(data[0].job_postings[0].title);
+        setApplicants(data as unknown as Applicant[]);
+        // The original code was accessing an array [0] element twice.
+        // After correcting the type and casting, we access the nested object directly.
+        // We will simplify the data access in the return block below.
+        setJobTitle((data[0] as unknown as Applicant).job_postings.title);
       }
 
     } catch (err: any) {
@@ -102,41 +107,40 @@ const ViewApplicants = () => {
       ) : (
         <div className="space-y-6 mt-4">
           {applicants.map((applicant) => (
-            applicant.profiles && applicant.profiles.length > 0 && (
-              <div key={applicant.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-800">{applicant.profiles[0].full_name}</h2>
-                    <a href={`mailto:${applicant.profiles[0].email}`} className="text-blue-500 hover:underline text-sm">
-                      {applicant.profiles[0].email}
-                    </a>
-                  </div>
-                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusBadgeClass(applicant.status)}`}>
-                    {applicant.status}
-                  </span>
+            // Access is simplified since the type is now a single object
+            <div key={applicant.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-800">{applicant.profiles.full_name}</h2>
+                  <a href={`mailto:${applicant.profiles.email}`} className="text-blue-500 hover:underline text-sm">
+                    {applicant.profiles.email}
+                  </a>
                 </div>
-                
-                <p className="text-gray-600 mt-4"><span className="font-semibold">Cover Letter:</span></p>
-                <p className="bg-gray-50 p-3 rounded-md mt-1 whitespace-pre-wrap">{applicant.cover_letter}</p>
-                
-                <div className="flex gap-4 mt-4 border-t pt-4">
-                  <button 
-                    onClick={() => handleUpdateStatus(applicant.id, 'Accepted')} 
-                    disabled={applicant.status === 'Accepted'}
-                    className="flex-1 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed transition"
-                  >
-                    Accept
-                  </button>
-                  <button 
-                    onClick={() => handleUpdateStatus(applicant.id, 'Rejected')} 
-                    disabled={applicant.status === 'Rejected'}
-                    className="flex-1 bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed transition"
-                  >
-                    Reject
-                  </button>
-                </div>
+                <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusBadgeClass(applicant.status)}`}>
+                  {applicant.status}
+                </span>
               </div>
-            )
+              
+              <p className="text-gray-600 mt-4"><span className="font-semibold">Cover Letter:</span></p>
+              <p className="bg-gray-50 p-3 rounded-md mt-1 whitespace-pre-wrap">{applicant.cover_letter}</p>
+              
+              <div className="flex gap-4 mt-4 border-t pt-4">
+                <button 
+                  onClick={() => handleUpdateStatus(applicant.id, 'Accepted')} 
+                  disabled={applicant.status === 'Accepted'}
+                  className="flex-1 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed transition"
+                >
+                  Accept
+                </button>
+                <button 
+                  onClick={() => handleUpdateStatus(applicant.id, 'Rejected')} 
+                  disabled={applicant.status === 'Rejected'}
+                  className="flex-1 bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed transition"
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       )}
