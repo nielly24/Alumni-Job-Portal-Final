@@ -22,6 +22,8 @@ const Auth = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [loginAttempts, setLoginAttempts] = useState(0);
+
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -120,39 +122,65 @@ const Auth = () => {
     }
   };
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+ 
 
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+const handleSignIn = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      // Increase failed attempts
+      setLoginAttempts(prev => {
+        const newAttempts = prev + 1;
+
+        if (newAttempts >= 3) {
+          // Send reset email automatically after 3 failed attempts
+          supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/auth/reset`,
+          });
+
+          toast({
+            title: "Too Many Attempts",
+            description: "We've sent a password reset link to your email.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Login Failed",
+            description: `Incorrect password. Attempts left: ${3 - newAttempts}`,
+            variant: "destructive",
+          });
+        }
+
+        return newAttempts;
       });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Welcome back!",
-          description: "You have been signed in successfully.",
-        });
-        navigate("/");
-      }
-    } catch (error) {
+    } else {
+      // Reset attempts if login succeeds
+      setLoginAttempts(0);
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
+        title: "Welcome back!",
+        description: "You have been signed in successfully.",
       });
-    } finally {
-      setLoading(false);
+      navigate("/");
     }
-  };
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "An unexpected error occurred. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   const handleIdNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/[^\d]/g, ''); // Remove non-digits
@@ -175,8 +203,8 @@ const Auth = () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth`,
-      });
+  redirectTo: `${window.location.origin}/reset-password`,
+});
 
       if (error) {
         toast({
