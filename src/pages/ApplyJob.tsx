@@ -80,6 +80,10 @@ const ApplyJob = () => {
     e.preventDefault();
     if (!user || !id) return;
 
+    // --- FIX #1: LOG THE USER ID ---
+    // This will tell us the exact user ID being sent to the database.
+    console.log('--- DEBUG: Submitting application for user ID:', user.id);
+
     setLoading(true);
 
     try {
@@ -105,8 +109,6 @@ const ApplyJob = () => {
         job_id: id,
         applicant_id: user.id,
         cover_letter: coverLetter || null,
-        // --- THIS IS THE FIX ---
-        // Changed 'resume_url' to 'resume_uri' to match your database
         resume_uri: resumeUrl || null,
       };
 
@@ -115,7 +117,7 @@ const ApplyJob = () => {
         .insert([applicationData]);
 
       if (error) {
-        // --- ADDED THIS CONSOLE LOG ---
+        // --- FIX #2: LOG THE SUPABASE ERROR ---
         console.error("Error submitting application:", error);
         toast({
           title: "Error",
@@ -130,7 +132,7 @@ const ApplyJob = () => {
         navigate(`/job/${id}`);
       }
     } catch (error) {
-      // --- ADDED THIS CONSOLE LOG ---
+      // --- FIX #3: LOG THE CATCH BLOCK ERROR ---
       console.error("An unexpected error occurred:", error);
       toast({
         title: "Error",
