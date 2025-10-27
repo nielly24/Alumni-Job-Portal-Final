@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/auth/v1/verify",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/auth/reset",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/:path((?!static$).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
