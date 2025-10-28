@@ -300,8 +300,9 @@ const Admin = () => {
               Back
             </Button>
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage users and view system statistics</p>
+          <h1 className="text-3xl font-bold text-black mb-2">Admin Dashboard</h1>
+<p className="text-black">Manage users and view system statistics</p>
+
         </div>
 
         {/* Statistics Cards */}

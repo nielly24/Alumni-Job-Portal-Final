@@ -152,54 +152,65 @@ const PostJob = () => {
                   <h3 className="text-lg font-semibold">Basic Information</h3>
                   
                   <div>
-                    <Label htmlFor="title">Job Title *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
-                      placeholder="e.g. Senior Software Engineer"
-                      required
-                    />
-                  </div>
+    <Label htmlFor="title">
+      Job Title <span className="text-red-500">*</span>
+    </Label>
+    <Input
+      id="title"
+      value={formData.title}
+      onChange={(e) => handleInputChange("title", e.target.value)}
+      placeholder="e.g. Senior Software Engineer"
+      required
+    />
+  </div>
+
+                   <div>
+    <Label htmlFor="company">
+      Company <span className="text-red-500">*</span>
+    </Label>
+    <Input
+      id="company"
+      value={formData.company}
+      onChange={(e) => handleInputChange("company", e.target.value)}
+      placeholder="e.g. TechCorp Inc."
+      required
+    />
+  </div>
+
+                   <div>
+    <Label htmlFor="location">
+      Location <span className="text-red-500">*</span>
+    </Label>
+    <Input
+      id="location"
+      value={formData.location}
+      onChange={(e) => handleInputChange("location", e.target.value)}
+      placeholder="e.g. San Francisco, CA or Remote"
+      required
+    />
+  </div>
 
                   <div>
-                    <Label htmlFor="company">Company *</Label>
-                    <Input
-                      id="company"
-                      value={formData.company}
-                      onChange={(e) => handleInputChange("company", e.target.value)}
-                      placeholder="e.g. TechCorp Inc."
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="location">Location *</Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => handleInputChange("location", e.target.value)}
-                      placeholder="e.g. San Francisco, CA or Remote"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="type">Job Type *</Label>
-                    <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select job type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Full-time">Full-time</SelectItem>
-                        <SelectItem value="Part-time">Part-time</SelectItem>
-                        <SelectItem value="Contract">Contract</SelectItem>
-                        <SelectItem value="Remote">Remote</SelectItem>
-                        <SelectItem value="Internship">Internship</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+    <Label htmlFor="type">
+      Job Type <span className="text-red-500">*</span>
+    </Label>
+    <Select
+      value={formData.type}
+      onValueChange={(value) => handleInputChange("type", value)}
+    >
+      <SelectTrigger>
+        <SelectValue placeholder="Select job type" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Full-time">Full-time</SelectItem>
+        <SelectItem value="Part-time">Part-time</SelectItem>
+        <SelectItem value="Contract">Contract</SelectItem>
+        <SelectItem value="Remote">Remote</SelectItem>
+        <SelectItem value="Internship">Internship</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+</div>
 
                 {/* Salary */}
                 <div className="space-y-4">
