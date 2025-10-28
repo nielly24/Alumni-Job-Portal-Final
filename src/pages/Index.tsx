@@ -152,10 +152,19 @@ const Index = () => {
 					<div className="grid grid-cols-1 md:grid-cols-4 gap-8">
 						<div>
 							<div className="flex items-center gap-3 mb-4">
-								<img src="/-uploads/554263cb-c020-41c0-97f8-9592f3dd2fd2.png" alt="CSU Logo" className="h-8 w-8" />
-								<img src="/-uploads/c101f9cb-9ca8-4f75-952b-fc90fd772dc8.png" alt="CpE Logo" className="h-8 w-8" />
-								<span className="font-bold">CpE Alumni Network</span>
-							</div>
+  <img 
+    src="/uploads/554263cb-c020-41c0-97f8-9592f3dd2fd2.png" 
+    alt="CSU Logo" 
+    className="h-8 w-8" 
+  />
+  <img 
+    src="/uploads/c101f9cb-9ca8-4f75-952b-fc90fd772dc8.png" 
+    alt="CpE Logo" 
+    className="h-8 w-8" 
+  />
+  <span className="font-bold">CpE Alumni Network</span>
+</div>
+
 							<p className="text-sm text-muted-foreground">
 								Connecting Computer Engineering graduates with exciting career opportunities.
 							</p>
@@ -168,14 +177,7 @@ const Index = () => {
 								<li>Alumni Directory</li>
 							</ul>
 						</div>
-						<div>
-							<h3 className="font-semibold mb-3">For Employers</h3>
-							<ul className="space-y-2 text-sm text-muted-foreground">
-								<li>Post a Job</li>
-								<li>Search Candidates</li>
-								<li>Pricing</li>
-							</ul>
-						</div>
+						
 						<div>
 							<h3 className="font-semibold mb-3">Support</h3>
 							<ul className="space-y-2 text-sm text-muted-foreground">
