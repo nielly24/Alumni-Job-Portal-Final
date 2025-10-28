@@ -146,49 +146,56 @@ const Index = () => {
 			{/* Community Stats */}
 			<CommunityStats />
 
-			{/* Footer */}
-			<footer className="bg-card/80 backdrop-blur-sm border-t py-12">
-				<div className="container mx-auto px-4">
-					<div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-						<div>
-							<div className="flex items-center gap-3 mb-4">
-  <img 
-    src="/uploads/554263cb-c020-41c0-97f8-9592f3dd2fd2.png" 
-    alt="CSU Logo" 
-    className="h-8 w-8" 
-  />
-  <img 
-    src="/uploads/c101f9cb-9ca8-4f75-952b-fc90fd772dc8.png" 
-    alt="CpE Logo" 
-    className="h-8 w-8" 
-  />
-  <span className="font-bold">CpE Alumni Network</span>
-</div>
+			<footer className="bg-gradient-to-b from-sky-100 to-sky-50 text-foreground py-10 px-6 md:px-16">
+  <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+    
+    {/* Logo + Description */}
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <img
+          src="/uploads/554263cb-c020-41c0-97f8-9592f3dd2fd2.png"
+          alt="CSU Logo"
+          className="h-10 w-10"
+        />
+        <img
+          src="/uploads/c101f9cb-9ca8-4f75-952b-fc90fd772dc8.png"
+          alt="CpE Logo"
+          className="h-10 w-10"
+        />
+        <span className="font-bold text-lg">CpE Alumni Network</span>
+      </div>
+      <p className="text-sm text-muted-foreground max-w-xs">
+        Connecting Computer Engineering graduates with exciting career opportunities.
+      </p>
+    </div>
 
-							<p className="text-sm text-muted-foreground">
-								Connecting Computer Engineering graduates with exciting career opportunities.
-							</p>
-						</div>
-						<div>
-							<h3 className="font-semibold mb-3">For Job Seekers</h3>
-							<ul className="space-y-2 text-sm text-muted-foreground">
-								<li>Browse Jobs</li>
-								<li>Career Resources</li>
-								<li>Alumni Directory</li>
-							</ul>
-						</div>
-						
-						<div>
-							<h3 className="font-semibold mb-3">Support</h3>
-							<ul className="space-y-2 text-sm text-muted-foreground">
-								<li>Help Center</li>
-								<li>Contact Us</li>
-								<li>Privacy Policy</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</footer>
+    {/* For Job Seekers */}
+    <div>
+      <h3 className="font-semibold mb-3">For Job Seekers</h3>
+      <ul className="space-y-2 text-sm">
+        <li><a href="#" className="hover:text-blue-600">Browse Jobs</a></li>
+        <li><a href="#" className="hover:text-blue-600">Career Resources</a></li>
+        <li><a href="#" className="hover:text-blue-600">Alumni Directory</a></li>
+      </ul>
+    </div>
+
+    {/* Support */}
+    <div>
+      <h3 className="font-semibold mb-3">Support</h3>
+      <ul className="space-y-2 text-sm">
+        <li><a href="#" className="hover:text-blue-600">Help Center</a></li>
+        <li><a href="#" className="hover:text-blue-600">Contact Us</a></li>
+        <li><a href="#" className="hover:text-blue-600">Privacy Policy</a></li>
+      </ul>
+    </div>
+  </div>
+
+  {/* Bottom Divider */}
+  <div className="mt-10 border-t border-gray-300 pt-4 text-center text-sm text-muted-foreground">
+    © {new Date().getFullYear()} CpE Alumni Network. All rights reserved.
+  </div>
+</footer>
+
 		</div>
 	);
 };
