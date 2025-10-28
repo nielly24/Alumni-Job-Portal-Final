@@ -304,17 +304,7 @@ const Jobs = () => {
                         </Button>
                       )}
 
-                      {/* 2. ADD THIS CONDITIONAL BLOCK */}
-                      {/* It checks if a user is logged in AND if their ID matches the job's user_id */}
-                      {user && user.id === job.user_id && (
-                        <Button
-                          onClick={() => navigate(`/jobs/${job.id}/applicants`)}
-                          className="flex-1 bg-green-600 hover:bg-green-700"
-                        >
-                          <Users className="mr-2 h-4 w-4" />
-                          View Applicants
-                        </Button>
-                      )}
+                     
                     </div>
                   </div>
                 </CardContent>
