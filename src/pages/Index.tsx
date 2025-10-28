@@ -147,10 +147,10 @@ const Index = () => {
 			<CommunityStats />
 
 			<footer className="bg-gradient-to-b from-sky-100 to-sky-50 text-foreground py-10 px-6 md:px-16">
-  <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+  <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between md:items-start gap-10 md:gap-20">
     
     {/* Logo + Description */}
-    <div>
+    <div className="md:w-1/2">
       <div className="flex items-center gap-3 mb-4">
         <img
           src="/uploads/554263cb-c020-41c0-97f8-9592f3dd2fd2.png"
@@ -169,24 +169,27 @@ const Index = () => {
       </p>
     </div>
 
-    {/* For Job Seekers */}
-    <div>
-      <h3 className="font-semibold mb-3">For Job Seekers</h3>
-      <ul className="space-y-2 text-sm">
-        <li><a href="#" className="hover:text-blue-600">Browse Jobs</a></li>
-        <li><a href="#" className="hover:text-blue-600">Career Resources</a></li>
-        <li><a href="#" className="hover:text-blue-600">Alumni Directory</a></li>
-      </ul>
-    </div>
+    {/* Links Section */}
+    <div className="flex gap-10">
+      {/* For Job Seekers */}
+      <div>
+        <h3 className="font-semibold mb-3">For Job Seekers</h3>
+        <ul className="space-y-2 text-sm">
+          <li><a href="#" className="hover:text-blue-600">Browse Jobs</a></li>
+          <li><a href="#" className="hover:text-blue-600">Career Resources</a></li>
+          <li><a href="#" className="hover:text-blue-600">Alumni Directory</a></li>
+        </ul>
+      </div>
 
-    {/* Support */}
-    <div>
-      <h3 className="font-semibold mb-3">Support</h3>
-      <ul className="space-y-2 text-sm">
-        <li><a href="#" className="hover:text-blue-600">Help Center</a></li>
-        <li><a href="#" className="hover:text-blue-600">Contact Us</a></li>
-        <li><a href="#" className="hover:text-blue-600">Privacy Policy</a></li>
-      </ul>
+      {/* Support */}
+      <div>
+        <h3 className="font-semibold mb-3">Support</h3>
+        <ul className="space-y-2 text-sm">
+          <li><a href="#" className="hover:text-blue-600">Help Center</a></li>
+          <li><a href="#" className="hover:text-blue-600">Contact Us</a></li>
+          <li><a href="#" className="hover:text-blue-600">Privacy Policy</a></li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -195,6 +198,7 @@ const Index = () => {
     © {new Date().getFullYear()} CpE Alumni Network. All rights reserved.
   </div>
 </footer>
+
 
 		</div>
 	);
