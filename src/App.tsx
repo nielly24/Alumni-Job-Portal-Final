@@ -17,10 +17,9 @@ import AlumniDirectory from "./pages/AlumniDirectory";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "@/pages/ResetPassword";
-import ViewApplicants from "./pages/ViewApplicants"; 
+
 // --- CONFIRMING IMPORTS ---
-import ViewMyApplication from "./pages/ViewMyApplication"; 
-import MyApplicationsList from "./pages/MyApplicationsList"; 
+ 
 
 const queryClient = new QueryClient();
 
@@ -37,14 +36,7 @@ const App = () => (
           <Route path="/job/:id" element={<JobDetails />} />
           <Route path="/job/:id/apply" element={<ApplyJob />} />
 
-          {/* Employer Routes */}
-          <Route path="/jobs/:jobId/applicants" element={<ViewApplicants />} />
-
-          {/* APPLICANT MONITORING ROUTES (NEW) */}
-          {/* List of all applications for the logged-in user */}
-          <Route path="/my-applications" element={<MyApplicationsList />} /> 
-          {/* Detailed status page for a single application */}
-          <Route path="/my-application/:jobId" element={<ViewMyApplication />} />
+          
 
           <Route path="/post-job" element={<PostJob />} />
           <Route path="/profile" element={<Profile />} />
