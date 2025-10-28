@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { User, Building, Plus, Edit, Trash2, CalendarIcon, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns"; // Import parseISO
 import { cn } from "@/lib/utils";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -86,7 +86,6 @@ const Profile = () => {
     try {
       setLoading(true);
       
-      // Load or create profile with dummy data
       let { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -94,21 +93,17 @@ const Profile = () => {
         .single();
 
       if (profileError && profileError.code === 'PGRST116') {
-        // Profile doesn't exist, create one with dummy data
         const dummyProfile = {
           user_id: userId,
-          full_name: "John Doe",
-          company: "Tech Solutions Inc.",
-          role: "Senior Software Engineer",
-          bio: "Experienced Computer Engineering graduate with 5+ years in software development. Passionate about AI, machine learning, and creating scalable solutions."
+          id: userId, // Ensure ID matches user_id
+          full_name: "Please Update",
+          company: "", role: "", bio: ""
         };
-
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
           .insert(dummyProfile)
           .select()
           .single();
-
         if (createError) throw createError;
         profileData = newProfile;
       } else if (profileError) {
@@ -123,7 +118,6 @@ const Profile = () => {
         bio: profileData?.bio || ""
       });
 
-      // Load employment history
       const { data: employmentData, error: employmentError } = await supabase
         .from('employment_history')
         .select('*')
@@ -132,13 +126,7 @@ const Profile = () => {
 
       if (employmentError) throw employmentError;
 
-      // If no employment history exists, create dummy data
-     if (!employmentData || employmentData.length === 0) {
-        // If there is no employment data, simply set an empty array
-        setEmploymentHistory([]);
-      } else {
-        setEmploymentHistory(employmentData || []);
-      }
+      setEmploymentHistory(employmentData || []);
 
     } catch (error) {
       console.error('Error loading profile data:', error);
@@ -180,7 +168,26 @@ const Profile = () => {
     }
   };
 
+  // --- NEW FUNCTION: To handle clicking the Edit button ---
+  const handleEditEmployment = (job: EmploymentHistory) => {
+    setEditingEmployment(job.id); // Set the ID of the item being edited
+    // Populate the form state with the data from the selected job
+    setEmploymentForm({
+      company: job.company,
+      position: job.position,
+      employment_type: job.employment_type,
+      location: job.location || "",
+      start_date: job.start_date ? parseISO(job.start_date) : undefined,
+      end_date: job.end_date ? parseISO(job.end_date) : undefined,
+      is_current: job.is_current,
+      description: job.description || ""
+    });
+    setShowEmploymentDialog(true); // Open the dialog
+  };
+  // --------------------------------------------------------
+
   const updateEmployment = async (id: string) => {
+    // --- FIX: Validation now uses the populated employmentForm state ---
     if (!user || !employmentForm.company || !employmentForm.position || !employmentForm.start_date) {
       toast({
         title: "Error",
@@ -197,7 +204,7 @@ const Profile = () => {
         employment_type: employmentForm.employment_type,
         location: employmentForm.location || null,
         start_date: format(employmentForm.start_date, 'yyyy-MM-dd'),
-        end_date: employmentForm.end_date ? format(employmentForm.end_date, 'yyyy-MM-dd') : null,
+        end_date: employmentForm.is_current ? null : (employmentForm.end_date ? format(employmentForm.end_date, 'yyyy-MM-dd') : null), // Set end_date to null if currently employed
         is_current: employmentForm.is_current,
         description: employmentForm.description || null
       };
@@ -270,7 +277,7 @@ const Profile = () => {
         employment_type: employmentForm.employment_type,
         location: employmentForm.location || null,
         start_date: format(employmentForm.start_date, 'yyyy-MM-dd'),
-        end_date: employmentForm.end_date ? format(employmentForm.end_date, 'yyyy-MM-dd') : null,
+        end_date: employmentForm.is_current ? null : (employmentForm.end_date ? format(employmentForm.end_date, 'yyyy-MM-dd') : null), // Set end_date to null if currently employed
         is_current: employmentForm.is_current,
         description: employmentForm.description || null
       };
@@ -312,6 +319,16 @@ const Profile = () => {
       description: ""
     });
     setEditingEmployment(null);
+  };
+
+  // --- Helper to format dates ---
+  const formatDateDisplay = (dateString: string | null | undefined): string => {
+      if (!dateString) return '';
+      try {
+          return format(parseISO(dateString), 'MMM yyyy');
+      } catch {
+          return 'Invalid Date';
+      }
   };
 
   if (loading) {
@@ -444,6 +461,7 @@ const Profile = () => {
                     Add Position
                   </Button>
                 </DialogTrigger>
+                {/* --- ADD/EDIT EMPLOYMENT DIALOG CONTENT --- */}
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>
@@ -454,24 +472,27 @@ const Profile = () => {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
+                    {/* Company */}
                     <div>
-                      <Label htmlFor="company">Company</Label>
+                      <Label htmlFor="edit-company">Company</Label>
                       <Input
-                        id="company"
+                        id="edit-company"
                         value={employmentForm.company}
                         onChange={(e) => setEmploymentForm({ ...employmentForm, company: e.target.value })}
                       />
                     </div>
+                    {/* Position */}
                     <div>
-                      <Label htmlFor="position">Position</Label>
+                      <Label htmlFor="edit-position">Position</Label>
                       <Input
-                        id="position"
+                        id="edit-position"
                         value={employmentForm.position}
                         onChange={(e) => setEmploymentForm({ ...employmentForm, position: e.target.value })}
                       />
                     </div>
+                    {/* Employment Type */}
                     <div>
-                      <Label htmlFor="employment_type">Employment Type</Label>
+                      <Label htmlFor="edit-employment_type">Employment Type</Label>
                       <Select value={employmentForm.employment_type} onValueChange={(value) => setEmploymentForm({ ...employmentForm, employment_type: value })}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select type" />
@@ -485,14 +506,16 @@ const Profile = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                    {/* Location */}
                     <div>
-                      <Label htmlFor="location">Location</Label>
+                      <Label htmlFor="edit-location">Location</Label>
                       <Input
-                        id="location"
+                        id="edit-location"
                         value={employmentForm.location}
                         onChange={(e) => setEmploymentForm({ ...employmentForm, location: e.target.value })}
                       />
                     </div>
+                    {/* Dates */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Start Date</Label>
@@ -501,16 +524,12 @@ const Profile = () => {
                             <Button
                               variant={"outline"}
                               className={cn(
-                                "w-[240px] justify-start text-left font-normal",
+                                "w-full justify-start text-left font-normal",
                                 !employmentForm.start_date && "text-muted-foreground"
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {employmentForm.start_date ? (
-                                format(employmentForm.start_date, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {employmentForm.start_date ? format(employmentForm.start_date, "PPP") : <span>Pick a date</span>}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -518,9 +537,7 @@ const Profile = () => {
                               mode="single"
                               selected={employmentForm.start_date}
                               onSelect={(date) => setEmploymentForm({ ...employmentForm, start_date: date })}
-                              disabled={(date) =>
-                                date > new Date()
-                              }
+                              disabled={(date) => date > new Date()}
                               initialFocus
                             />
                           </PopoverContent>
@@ -532,17 +549,14 @@ const Profile = () => {
                           <PopoverTrigger asChild>
                             <Button
                               variant={"outline"}
+                              disabled={employmentForm.is_current} // Disable if currently employed
                               className={cn(
-                                "w-[240px] justify-start text-left font-normal",
+                                "w-full justify-start text-left font-normal",
                                 !employmentForm.end_date && "text-muted-foreground"
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {employmentForm.end_date ? (
-                                format(employmentForm.end_date, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {employmentForm.is_current ? "Present" : (employmentForm.end_date ? format(employmentForm.end_date, "PPP") : <span>Pick a date</span>)}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -550,28 +564,28 @@ const Profile = () => {
                               mode="single"
                               selected={employmentForm.end_date}
                               onSelect={(date) => setEmploymentForm({ ...employmentForm, end_date: date })}
-                              disabled={(date) =>
-                                date > new Date() || (employmentForm.start_date && date < employmentForm.start_date)
-                              }
+                              disabled={(date) => date > new Date() || (employmentForm.start_date && date < employmentForm.start_date) || employmentForm.is_current}
                               initialFocus
                             />
                           </PopoverContent>
                         </Popover>
                       </div>
                     </div>
-                    <div>
-                      <Label htmlFor="is_current">Currently Employed</Label>
+                    {/* Currently Employed Checkbox */}
+                    <div className="flex items-center space-x-2">
                       <Input
                         type="checkbox"
-                        id="is_current"
+                        id="edit-is_current"
                         checked={employmentForm.is_current}
-                        onChange={(e) => setEmploymentForm({ ...employmentForm, is_current: e.target.checked })}
+                        onChange={(e) => setEmploymentForm({ ...employmentForm, is_current: e.target.checked, end_date: e.target.checked ? undefined : employmentForm.end_date })} // Clear end_date if checked
                       />
+                       <Label htmlFor="edit-is_current">I am currently working in this role</Label>
                     </div>
+                    {/* Description */}
                     <div>
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="edit-description">Description</Label>
                       <Textarea
-                        id="description"
+                        id="edit-description"
                         value={employmentForm.description}
                         onChange={(e) => setEmploymentForm({ ...employmentForm, description: e.target.value })}
                         rows={4}
@@ -582,7 +596,7 @@ const Profile = () => {
                     <Button type="button" variant="secondary" onClick={() => setShowEmploymentDialog(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit" onClick={() => {
+                    <Button type="button" onClick={() => {
                       if (editingEmployment) {
                         updateEmployment(editingEmployment);
                       } else {
@@ -598,185 +612,43 @@ const Profile = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {employmentHistory.map((job) => (
-                <div key={job.id} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="font-semibold text-lg">{job.position}</h3>
-                      <p className="text-muted-foreground flex items-center gap-1">
-                        <Building className="h-4 w-4" />
-                        {job.company}
-                      </p>
+              {employmentHistory.length === 0 ? (
+                 <p className="text-center text-muted-foreground">No employment history added yet.</p>
+              ) : (
+                employmentHistory.map((job) => (
+                  <div key={job.id} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="font-semibold text-lg">{job.position}</h3>
+                        <p className="text-muted-foreground flex items-center gap-1">
+                          <Building className="h-4 w-4" />
+                          {job.company}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {job.is_current && <Badge variant="secondary">Current</Badge>}
+                        <Badge variant="outline">{job.employment_type}</Badge>
+                        {/* --- FIX: Changed DialogTrigger to Button with onClick --- */}
+                        <Button variant="ghost" onClick={() => handleEditEmployment(job)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                        <Button variant="ghost" onClick={() => deleteEmployment(job.id)}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {job.is_current && <Badge variant="secondary">Current</Badge>}
-                      <Badge variant="outline">{job.employment_type}</Badge>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost">
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>Edit Employment</DialogTitle>
-                            <DialogDescription>
-                              Edit details about your work experience
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="grid gap-4 py-4">
-                            <div>
-                              <Label htmlFor="company">Company</Label>
-                              <Input
-                                id="company"
-                                defaultValue={job.company}
-                                onChange={(e) => setEmploymentForm({ ...employmentForm, company: e.target.value })}
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="position">Position</Label>
-                              <Input
-                                id="position"
-                                defaultValue={job.position}
-                                onChange={(e) => setEmploymentForm({ ...employmentForm, position: e.target.value })}
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="employment_type">Employment Type</Label>
-                              <Select defaultValue={job.employment_type} onValueChange={(value) => setEmploymentForm({ ...employmentForm, employment_type: value })}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="full-time">Full-time</SelectItem>
-                                  <SelectItem value="part-time">Part-time</SelectItem>
-                                  <SelectItem value="contract">Contract</SelectItem>
-                                  <SelectItem value="internship">Internship</SelectItem>
-                                  <SelectItem value="temporary">Temporary</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label htmlFor="location">Location</Label>
-                              <Input
-                                id="location"
-                                defaultValue={job.location || ""}
-                                onChange={(e) => setEmploymentForm({ ...employmentForm, location: e.target.value })}
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label>Start Date</Label>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant={"outline"}
-                                      className={cn(
-                                        "w-[240px] justify-start text-left font-normal",
-                                        !employmentForm.start_date && "text-muted-foreground"
-                                      )}
-                                    >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {employmentForm.start_date ? (
-                                        format(employmentForm.start_date, "PPP")
-                                      ) : (
-                                        <span>Pick a date</span>
-                                      )}
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                      mode="single"
-                                      selected={employmentForm.start_date}
-                                      onSelect={(date) => setEmploymentForm({ ...employmentForm, start_date: date })}
-                                      disabled={(date) =>
-                                        date > new Date()
-                                      }
-                                      initialFocus
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                              </div>
-                              <div>
-                                <Label>End Date</Label>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant={"outline"}
-                                      className={cn(
-                                        "w-[240px] justify-start text-left font-normal",
-                                        !employmentForm.end_date && "text-muted-foreground"
-                                      )}
-                                    >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {employmentForm.end_date ? (
-                                        format(employmentForm.end_date, "PPP")
-                                      ) : (
-                                        <span>Pick a date</span>
-                                      )}
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                      mode="single"
-                                      selected={employmentForm.end_date}
-                                      onSelect={(date) => setEmploymentForm({ ...employmentForm, end_date: date })}
-                                      disabled={(date) =>
-                                        date > new Date() || (employmentForm.start_date && date < employmentForm.start_date)
-                                      }
-                                      initialFocus
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                              </div>
-                            </div>
-                            <div>
-                              <Label htmlFor="is_current">Currently Employed</Label>
-                              <Input
-                                type="checkbox"
-                                id="is_current"
-                                checked={employmentForm.is_current}
-                                onChange={(e) => setEmploymentForm({ ...employmentForm, is_current: e.target.checked })}
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="description">Description</Label>
-                              <Textarea
-                                id="description"
-                                defaultValue={job.description || ""}
-                                onChange={(e) => setEmploymentForm({ ...employmentForm, description: e.target.value })}
-                                rows={4}
-                              />
-                            </div>
-                          </div>
-                          <div className="flex justify-end gap-2">
-                            <Button type="button" variant="secondary" onClick={() => setShowEmploymentDialog(false)}>
-                              Cancel
-                            </Button>
-                            <Button type="submit" onClick={() => {
-                              updateEmployment(job.id);
-                            }}>
-                              Update Position
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      <Button variant="ghost" onClick={() => deleteEmployment(job.id)}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                       <span>{formatDateDisplay(job.start_date)} - {job.is_current ? 'Present' : formatDateDisplay(job.end_date)}</span>
+                      {job.location && <span>• {job.location}</span>}
                     </div>
+                    {job.description && (
+                      <p className="text-sm text-muted-foreground mt-2">{job.description}</p>
+                    )}
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-                    <span>{format(new Date(job.start_date), 'MMM yyyy')} - {job.end_date ? format(new Date(job.end_date), 'MMM yyyy') : 'Present'}</span>
-                    {job.location && <span>• {job.location}</span>}
-                  </div>
-                  {job.description && (
-                    <p className="text-sm text-muted-foreground mt-2">{job.description}</p>
-                  )}
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
