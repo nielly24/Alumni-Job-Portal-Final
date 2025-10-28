@@ -129,27 +129,33 @@ const handleSignIn = async (e: React.FormEvent) => {
   setLoading(true);
 
   try {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      // Increase failed attempts
-      setLoginAttempts(prev => {
+      setLoginAttempts((prev) => {
         const newAttempts = prev + 1;
 
         if (newAttempts >= 3) {
-          // Send reset email automatically after 3 failed attempts
-          supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/auth/reset`,
-          });
-
-          toast({
-            title: "Too Many Attempts",
-            description: "We've sent a password reset link to your email.",
-            variant: "destructive",
-          });
+          // 🔹 await ensures Supabase actually sends it before continuing
+          supabase.auth
+            .resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/reset-password`, // matches Supabase setting
+            })
+            .then(({ error }) => {
+              if (error) {
+                toast({
+                  title: "Reset Failed",
+                  description: error.message,
+                  variant: "destructive",
+                });
+              } else {
+                toast({
+                  title: "Too Many Attempts",
+                  description: "We've sent a password reset link to your email (if registered).",
+                  variant: "destructive",
+                });
+              }
+            });
         } else {
           toast({
             title: "Login Failed",
@@ -161,7 +167,7 @@ const handleSignIn = async (e: React.FormEvent) => {
         return newAttempts;
       });
     } else {
-      // Reset attempts if login succeeds
+      // 🔹 Success: reset attempts
       setLoginAttempts(0);
       toast({
         title: "Welcome back!",
@@ -169,7 +175,7 @@ const handleSignIn = async (e: React.FormEvent) => {
       });
       navigate("/");
     }
-  } catch (error) {
+  } catch (err) {
     toast({
       title: "Error",
       description: "An unexpected error occurred. Please try again.",
