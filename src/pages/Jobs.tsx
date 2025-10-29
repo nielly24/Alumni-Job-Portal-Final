@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Building, Clock, Briefcase, Search, Plus, Users } from "lucide-react";
+import { MapPin, Building, Clock, Briefcase, Search, Plus } from "lucide-react"; // Removed 'Users' as it's no longer needed
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
@@ -39,7 +39,6 @@ const Jobs = () => {
   const [locationFilter, setLocationFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -47,14 +46,12 @@ const Jobs = () => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setSession(session);
         setUser(session?.user ?? null);
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
       setUser(session?.user ?? null);
     });
 
@@ -276,22 +273,12 @@ const Jobs = () => {
                     <div className="flex gap-2 pt-2">
                       <Button 
                         onClick={() => navigate(`/job/${job.id}`)}
-                        className="flex-1"
+                        className="w-full" // Use w-full to make it take the full width
                       >
                         View Details
                       </Button>
                       
-                      {/* --- "VIEW APPLICANTS" BUTTON RE-ADDED --- */}
-                      {user && user.id === job.user_id && (
-                        <Button
-                          onClick={() => navigate(`/jobs/${job.id}/applicants`)}
-                          className="flex-1 bg-green-600 hover:bg-green-700"
-                        >
-                          <Users className="mr-2 h-4 w-4" />
-                          View Applicants
-                        </Button>
-                      )}
-                      {/* -------------------------------------- */}
+                      {/* --- "VIEW APPLICANTS" BUTTON REMOVED --- */}
 
                     </div>
                   </div>
