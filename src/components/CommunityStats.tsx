@@ -15,26 +15,27 @@ const CommunityStats = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // --- FIX 1: Query for ALUMNI Count ---
-        // Alumni status is determined by the user_roles table, not a column in 'profiles'.
-        const { count: alumniCount, error: alumniError } = await supabase
+        let alumniCount = 0;
+        let totalCount = 0;
+
+        const { count: fetchedAlumniCount, error: alumniError } = await supabase
           .from('user_roles')
           .select('*', { count: 'exact', head: true })
-          .eq('role', 'alumni'); // Assuming 'role' is the column name in user_roles
+          .eq('role', 'alumni');
 
         if (alumniError) throw alumniError;
+        alumniCount = fetchedAlumniCount || 0;
 
-        // --- FIX 2: Query for TOTAL Users Count ---
-        // Total count is the total number of profiles.
-        const { count: totalCount, error: totalError } = await supabase
+        const { count: fetchedTotalCount, error: totalError } = await supabase
           .from('profiles')
           .select('*', { count: 'exact', head: true });
 
         if (totalError) throw totalError;
+        totalCount = fetchedTotalCount || 0;
 
         setStats({
-          alumni: alumniCount || 0,
-          total: totalCount || 0 // Use the dedicated total count
+          alumni: alumniCount,
+          total: totalCount
         });
 
       } catch (error) {
@@ -88,8 +89,10 @@ const CommunityStats = () => {
 
           <Card className="text-center">
             <CardHeader className="pb-4">
-              <div className="w-12 h-12 mx-auto bg-accent/10 rounded-full flex items-center justify-center mb-2">
-                <TrendingUp className="w-6 h-6 text-accent" />
+              {/* --- FIX: Changed background color for consistency --- */}
+              <div className="w-12 h-12 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-2">
+                {/* --- FIX: Changed icon color to be visible --- */}
+                <TrendingUp className="w-6 h-6 text-primary" />
               </div>
               <CardTitle className="text-2xl font-bold">{stats.total.toLocaleString()}</CardTitle>
             </CardHeader>
