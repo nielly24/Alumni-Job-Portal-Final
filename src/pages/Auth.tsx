@@ -242,7 +242,7 @@ const handleSignIn = async (e: React.FormEvent) => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">CpE Alumni Network</h1>
-          <p className="text-muted-foreground mt-2">Join our professional community</p>
+        <p className="text-black mt-2">Join our professional community</p>
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
