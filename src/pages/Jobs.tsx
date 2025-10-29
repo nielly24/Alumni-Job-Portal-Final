@@ -215,10 +215,10 @@ const Jobs = () => {
 
         {/* Results Summary */}
         <div className="mb-6">
-          <p className="text-muted-foreground">
-            {filteredJobs.length} job{filteredJobs.length !== 1 ? 's' : ''} found
-          </p>
-        </div>
+  <p className="text-black">
+    {filteredJobs.length} job{filteredJobs.length !== 1 ? 's' : ''} found
+  </p>
+</div>
 
         {/* Job Listings */}
         <div className="grid grid-cols-1 gap-6">
