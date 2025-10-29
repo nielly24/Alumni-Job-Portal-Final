@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Building, Clock, DollarSign, ArrowLeft, Edit } from "lucide-react"; // 1. Import Edit icon
+import { MapPin, Building, Clock, DollarSign, ArrowLeft, Edit, Trash2 } from "lucide-react"; // 1. Import Trash2 icon
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import type { User } from "@supabase/supabase-js"; // 2. Import User type
+import type { User } from "@supabase/supabase-js";
 
 interface JobPosting {
   id: string;
@@ -20,28 +20,24 @@ interface JobPosting {
   description: string;
   requirements?: string;
   benefits?: string;
-  application_url?: string;
-  application_email?: string;
   created_at: string;
   featured: boolean;
-  user_id: string; // 3. Add user_id to the interface
+  user_id: string;
 }
 
 const JobDetails = () => {
   const { id } = useParams();
   const [job, setJob] = useState<JobPosting | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User | null>(null); // 4. Add state for current user
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     const checkUserAndFetchJob = async () => {
-      // Fetch the currently logged-in user
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
 
-      // Fetch the job details
       if (id) {
         await fetchJob();
       }
@@ -57,35 +53,53 @@ const JobDetails = () => {
         .eq('id', id)
         .eq('is_active', true)
         .single();
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Job not found",
-          variant: "destructive",
-        });
-        navigate("/jobs");
-      } else {
-        setJob(data);
-      }
+      if (error) throw error;
+      setJob(data);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch job details",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Job not found", variant: "destructive" });
       navigate("/jobs");
     } finally {
       setLoading(false);
     }
   };
 
+  // 2. NEW FUNCTION to handle deleting the job
+  const handleDelete = async () => {
+    if (!job) return;
+
+    const isConfirmed = window.confirm("Are you sure you want to delete this job posting? This action cannot be undone.");
+
+    if (isConfirmed) {
+      try {
+        const { error } = await supabase
+          .from('job_postings')
+          .delete()
+          .eq('id', job.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Job posting deleted successfully.",
+        });
+        navigate("/jobs");
+      } catch (error) {
+        console.error("Error deleting job:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete job posting. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const formatSalary = (min?: number, max?: number) => {
-    if (!min && !max) return "Salary not specified";
+    if (!min && !max) return "Not specified";
     if (min && max) return `₱${min.toLocaleString()} - ₱${max.toLocaleString()}`;
     if (min) return `From ₱${min.toLocaleString()}`;
     if (max) return `Up to ₱${max.toLocaleString()}`;
-    return "Salary not specified";
+    return "Not specified";
   };
 
   const formatDate = (dateString: string) => {
@@ -103,10 +117,7 @@ const JobDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading job details...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
       </div>
     );
   }
@@ -122,9 +133,10 @@ const JobDetails = () => {
     );
   }
 
+  const isOwner = currentUser && job && currentUser.id === job.user_id;
+
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <header className="border-b bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Button variant="ghost" onClick={() => navigate("/jobs")}>
@@ -132,14 +144,19 @@ const JobDetails = () => {
             Back to Jobs
           </Button>
 
-          {/* --- 5. ADDED THE EDIT BUTTON (conditionally rendered) --- */}
-          {currentUser && job && currentUser.id === job.user_id && (
-            <Button onClick={() => navigate(`/edit-job/${job.id}`)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Job
-            </Button>
+          {/* 3. ADDED "Edit" and "Delete" buttons for the owner */}
+          {isOwner && (
+            <div className="flex gap-2">
+              <Button onClick={() => navigate(`/edit-job/${job.id}`)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Job
+              </Button>
+              <Button variant="destructive" onClick={handleDelete}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Job
+              </Button>
+            </div>
           )}
-          {/* -------------------------------------------------------- */}
         </div>
       </header>
 
@@ -180,9 +197,7 @@ const JobDetails = () => {
                     Posted {formatDate(job.created_at)}
                   </div>
                 </div>
-
                 <Separator className="my-6" />
-
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Job Description</h3>
@@ -190,7 +205,6 @@ const JobDetails = () => {
                       <p className="whitespace-pre-wrap">{job.description}</p>
                     </div>
                   </div>
-
                   {job.requirements && (
                     <div>
                       <h3 className="text-lg font-semibold mb-3">Requirements</h3>
@@ -199,7 +213,6 @@ const JobDetails = () => {
                       </div>
                     </div>
                   )}
-
                   {job.benefits && (
                     <div>
                       <h3 className="text-lg font-semibold mb-3">Benefits</h3>
@@ -212,34 +225,16 @@ const JobDetails = () => {
               </CardContent>
             </Card>
           </div>
-
           {/* Sidebar */}
           <div className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Job Summary</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle>Job Summary</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Company</span>
-                  <span className="font-medium">{job.company}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Location</span>
-                  <span className="font-medium">{job.location}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Job Type</span>
-                  <span className="font-medium">{job.type}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Salary</span>
-                  <span className="font-medium">{formatSalary(job.salary_min, job.salary_max)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Posted</span>
-                  <span className="font-medium">{formatDate(job.created_at)}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Company</span><span className="font-medium">{job.company}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Location</span><span className="font-medium">{job.location}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Job Type</span><span className="font-medium">{job.type}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Salary</span><span className="font-medium">{formatSalary(job.salary_min, job.salary_max)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Posted</span><span className="font-medium">{formatDate(job.created_at)}</span></div>
               </CardContent>
             </Card>
           </div>
