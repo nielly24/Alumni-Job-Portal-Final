@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Building, Clock, DollarSign, ArrowLeft } from "lucide-react";
+import { MapPin, Building, Clock, DollarSign, ArrowLeft, Edit } from "lucide-react"; // 1. Import Edit icon
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { User } from "@supabase/supabase-js"; // 2. Import User type
 
 interface JobPosting {
   id: string;
@@ -23,19 +24,29 @@ interface JobPosting {
   application_email?: string;
   created_at: string;
   featured: boolean;
+  user_id: string; // 3. Add user_id to the interface
 }
 
 const JobDetails = () => {
   const { id } = useParams();
   const [job, setJob] = useState<JobPosting | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null); // 4. Add state for current user
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (id) {
-      fetchJob();
-    }
+    const checkUserAndFetchJob = async () => {
+      // Fetch the currently logged-in user
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+
+      // Fetch the job details
+      if (id) {
+        await fetchJob();
+      }
+    };
+    checkUserAndFetchJob();
   }, [id]);
 
   const fetchJob = async () => {
@@ -115,11 +126,20 @@ const JobDetails = () => {
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b bg-card/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Button variant="ghost" onClick={() => navigate("/jobs")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Jobs
           </Button>
+
+          {/* --- 5. ADDED THE EDIT BUTTON (conditionally rendered) --- */}
+          {currentUser && job && currentUser.id === job.user_id && (
+            <Button onClick={() => navigate(`/edit-job/${job.id}`)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Job
+            </Button>
+          )}
+          {/* -------------------------------------------------------- */}
         </div>
       </header>
 
@@ -195,10 +215,6 @@ const JobDetails = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            
-            {/* --- "APPLY CARD" REMOVED FROM HERE --- */}
-
-            {/* Job Summary */}
             <Card>
               <CardHeader>
                 <CardTitle>Job Summary</CardTitle>
