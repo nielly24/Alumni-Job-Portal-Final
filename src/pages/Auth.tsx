@@ -22,6 +22,7 @@ const Auth = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [idNumberError, setIdNumberError] = useState(""); // 1. Added state for ID error
   const [loginAttempts, setLoginAttempts] = useState(0);
 
   const navigate = useNavigate();
@@ -55,6 +56,17 @@ const Auth = () => {
     return true;
   };
 
+  // 2. Added new validation function for ID Number
+  const validateIdNumber = (id: string): boolean => {
+    const idPattern = /^\d{2}-\d{5}$/;
+    if (!idPattern.test(id)) {
+      setIdNumberError("ID Number must be in the format XX-XXXXX");
+      return false;
+    }
+    setIdNumberError(""); // Clear error if valid
+    return true;
+  };
+
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value;
     setPassword(newPassword);
@@ -68,13 +80,17 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validatePassword(password)) {
+    // 3. Updated sign-up logic to validate both fields
+    const isPasswordValid = validatePassword(password);
+    const isIdValid = validateIdNumber(idNumber);
+
+    if (!isPasswordValid || !isIdValid) {
       toast({
-        title: "Invalid Password",
-        description: passwordError,
+        title: "Invalid Information",
+        description: "Please correct the errors on the form before submitting.",
         variant: "destructive",
       });
-      return;
+      return; // Stop submission
     }
     
     setLoading(true);
@@ -122,71 +138,65 @@ const Auth = () => {
     }
   };
 
- 
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-const handleSignIn = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  try {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setLoginAttempts((prev) => {
+          const newAttempts = prev + 1;
 
-    if (error) {
-      setLoginAttempts((prev) => {
-        const newAttempts = prev + 1;
-
-        if (newAttempts >= 3) {
-          // 🔹 await ensures Supabase actually sends it before continuing
-          supabase.auth
-            .resetPasswordForEmail(email, {
-              redirectTo: `${window.location.origin}/reset-password`, // matches Supabase setting
-            })
-            .then(({ error }) => {
-              if (error) {
-                toast({
-                  title: "Reset Failed",
-                  description: error.message,
-                  variant: "destructive",
-                });
-              } else {
-                toast({
-                  title: "Too Many Attempts",
-                  description: "We've sent a password reset link to your email (if registered).",
-                  variant: "destructive",
-                });
-              }
+          if (newAttempts >= 3) {
+            supabase.auth
+              .resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+              })
+              .then(({ error }) => {
+                if (error) {
+                  toast({
+                    title: "Reset Failed",
+                    description: error.message,
+                    variant: "destructive",
+                  });
+                } else {
+                  toast({
+                    title: "Too Many Attempts",
+                    description: "We've sent a password reset link to your email (if registered).",
+                    variant: "destructive",
+                  });
+                }
+              });
+          } else {
+            toast({
+              title: "Login Failed",
+              description: `Incorrect password. Attempts left: ${3 - newAttempts}`,
+              variant: "destructive",
             });
-        } else {
-          toast({
-            title: "Login Failed",
-            description: `Incorrect password. Attempts left: ${3 - newAttempts}`,
-            variant: "destructive",
-          });
-        }
+          }
 
-        return newAttempts;
-      });
-    } else {
-      // 🔹 Success: reset attempts
-      setLoginAttempts(0);
+          return newAttempts;
+        });
+      } else {
+        setLoginAttempts(0);
+        toast({
+          title: "Welcome back!",
+          description: "You have been signed in successfully.",
+        });
+        navigate("/");
+      }
+    } catch (err) {
       toast({
-        title: "Welcome back!",
-        description: "You have been signed in successfully.",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
       });
-      navigate("/");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    toast({
-      title: "Error",
-      description: "An unexpected error occurred. Please try again.",
-      variant: "destructive",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  };
 
   const handleIdNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/[^\d]/g, ''); // Remove non-digits
@@ -195,7 +205,6 @@ const handleSignIn = async (e: React.FormEvent) => {
       value = value.slice(0, 7); // Max 7 digits (2+5)
     }
     
-    // Add dash after 2 digits
     if (value.length > 2) {
       value = value.slice(0, 2) + '-' + value.slice(2);
     }
@@ -209,8 +218,8 @@ const handleSignIn = async (e: React.FormEvent) => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-  redirectTo: `${window.location.origin}/reset-password`,
-});
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
 
       if (error) {
         toast({
@@ -242,7 +251,7 @@ const handleSignIn = async (e: React.FormEvent) => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">CpE Alumni Network</h1>
-        <p className="text-black mt-2">Join our professional community</p>
+          <p className="text-black mt-2">Join our professional community</p>
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
@@ -401,6 +410,7 @@ const handleSignIn = async (e: React.FormEvent) => {
                     </p>
                   </div>
 
+                  {/* 4. Updated JSX to display the error and border */}
                   <div>
                     <Label htmlFor="signup-id-number">Alumni ID Number</Label>
                     <Input
@@ -411,7 +421,11 @@ const handleSignIn = async (e: React.FormEvent) => {
                       onChange={handleIdNumberChange}
                       required
                       maxLength={8}
+                      className={idNumberError ? "border-destructive" : ""}
                     />
+                    {idNumberError && (
+                      <p className="text-sm text-destructive mt-1">{idNumberError}</p>
+                    )}
                   </div>
 
                   <div>
