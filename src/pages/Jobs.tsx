@@ -227,7 +227,7 @@ const Jobs = () => {
               <div className="flex flex-col items-center gap-4">
                 <Briefcase className="h-12 w-12 text-muted-foreground" />
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">No jobs found</h3>
+                 <h3 className="text-lg font-semibold mb-2 text-black">No jobs found</h3>
                   <p className="text-muted-foreground">
                     {searchTerm || locationFilter || typeFilter
                       ? "Try adjusting your search criteria"
