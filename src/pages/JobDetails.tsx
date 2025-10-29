@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Building, Clock, DollarSign, Briefcase, ArrowLeft } from "lucide-react";
+import { MapPin, Building, Clock, DollarSign, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,21 +29,14 @@ const JobDetails = () => {
   const { id } = useParams();
   const [job, setJob] = useState<JobPosting | null>(null);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    checkAuth();
     if (id) {
       fetchJob();
     }
   }, [id]);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setUser(session?.user || null);
-  };
 
   const fetchJob = async () => {
     try {
@@ -90,27 +83,10 @@ const JobDetails = () => {
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 1) return "1 day ago";
+    if (diffDays <= 1) return "1 day ago";
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
     return `${Math.ceil(diffDays / 30)} months ago`;
-  };
-
-  const handleApply = () => {
-    if (!user) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to apply for this job",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    if (job?.application_url) {
-      window.open(job.application_url, '_blank');
-    } else {
-      navigate(`/job/${id}/apply`);
-    }
   };
 
   if (loading) {
@@ -219,39 +195,8 @@ const JobDetails = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Apply Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="h-5 w-5" />
-                  Apply for this position
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button onClick={handleApply} className="w-full" size="lg">
-                  {job.application_url ? "Apply on Company Website" : "Apply Now"}
-                </Button>
-                {user && job.application_email && (
-                  <div className="text-sm text-muted-foreground">
-                    <p>Or email your resume to:</p>
-                    <a 
-                      href={`mailto:${job.application_email}`}
-                      className="text-primary hover:underline font-medium"
-                    >
-                      {job.application_email}
-                    </a>
-                  </div>
-                )}
-                {!user && (
-                  <p className="text-sm text-muted-foreground text-center">
-                    <Button variant="link" onClick={() => navigate("/auth")} className="p-0 h-auto">
-                      Sign in
-                    </Button>
-                    {" "}to view employer contact details and apply
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+            
+            {/* --- "APPLY CARD" REMOVED FROM HERE --- */}
 
             {/* Job Summary */}
             <Card>
