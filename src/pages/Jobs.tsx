@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// 1. IMPORT THE 'Users' ICON
 import { MapPin, Building, Clock, Briefcase, Search, Plus, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -79,22 +78,9 @@ const Jobs = () => {
       const { data, error } = await supabase
         .from('job_postings')
         .select(`
-          id,
-          title,
-          company,
-          location,
-          type,
-          salary_min,
-          salary_max,
-          description,
-          requirements,
-          benefits,
-          application_url,
-          application_email,
-          created_at,
-          featured,
-          is_active,
-          user_id
+          id, title, company, location, type, salary_min, salary_max, 
+          description, requirements, benefits, application_url, 
+          application_email, created_at, featured, is_active, user_id
         `)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
@@ -107,10 +93,9 @@ const Jobs = () => {
           variant: "destructive",
         });
       } else {
-        // Transform data to match our interface
         const transformedJobs = (data || []).map(job => ({
           ...job,
-          profiles: null // We'll add profile fetching later if needed
+          profiles: null 
         }));
         setJobs(transformedJobs);
       }
@@ -148,7 +133,7 @@ const Jobs = () => {
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 1) return "1 day ago";
+    if (diffDays <= 1) return "1 day ago";
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
     return `${Math.ceil(diffDays / 30)} months ago`;
@@ -295,16 +280,19 @@ const Jobs = () => {
                       >
                         View Details
                       </Button>
-                      {user && user.id !== job.user_id && ( // Make sure user can't apply to their own job
-                        <Button 
-                          variant="outline"
-                          onClick={() => navigate(`/job/${job.id}/apply`)}
+                      
+                      {/* --- "VIEW APPLICANTS" BUTTON RE-ADDED --- */}
+                      {user && user.id === job.user_id && (
+                        <Button
+                          onClick={() => navigate(`/jobs/${job.id}/applicants`)}
+                          className="flex-1 bg-green-600 hover:bg-green-700"
                         >
-                          Apply Now
+                          <Users className="mr-2 h-4 w-4" />
+                          View Applicants
                         </Button>
                       )}
+                      {/* -------------------------------------- */}
 
-                     
                     </div>
                   </div>
                 </CardContent>
