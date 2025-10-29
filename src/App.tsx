@@ -18,9 +18,6 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "@/pages/ResetPassword";
 
-// --- CONFIRMING IMPORTS ---
- 
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -36,9 +33,12 @@ const App = () => (
           <Route path="/job/:id" element={<JobDetails />} />
           <Route path="/job/:id/apply" element={<ApplyJob />} />
 
-          
-
           <Route path="/post-job" element={<PostJob />} />
+          
+          {/* --- NEW ROUTE FOR EDITING A JOB --- */}
+          <Route path="/edit-job/:id" element={<PostJob />} />
+          {/* ----------------------------------- */}
+          
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:userId" element={<UserProfile />} />
           <Route path="/alumni" element={<AlumniDirectory />} />
