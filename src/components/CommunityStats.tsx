@@ -66,9 +66,9 @@ const CommunityStats = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Our Growing Community</h2>
-          <p className="text-muted-foreground">
-            Join thousands of Computer Engineering professionals
-          </p>
+        <p className="text-black">
+  Join thousands of Computer Engineering professionals
+</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
