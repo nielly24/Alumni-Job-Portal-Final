@@ -250,7 +250,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold">CpE Alumni Network</h1>
+          <h1 className="text-3xl font-bold">CpE Alumni Job Portal</h1>
           <p className="text-black mt-2">Join our professional community</p>
         </div>
 
@@ -349,7 +349,7 @@ const Auth = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Create account</CardTitle>
-                <CardDescription>Join the CpE Alumni Network today</CardDescription>
+                <CardDescription>Join the CpE Alumni Community today</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignUp} className="space-y-4">

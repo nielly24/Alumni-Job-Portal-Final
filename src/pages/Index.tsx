@@ -78,7 +78,7 @@ const Index = () => {
 						<div className="flex items-center gap-3">
 							<img src="/uploads/554263cb-c020-41c0-97f8-9592f3dd2fd2.png" alt="CSU Logo" className="h-10 w-10" />
 							<img src="/uploads/c101f9cb-9ca8-4f75-952b-fc90fd772dc8.png" alt="CpE Logo" className="h-10 w-10" />
-							<h1 className="text-2xl font-bold">CpE Alumni Network</h1>
+							<h1 className="text-2xl font-bold">CpE Alumni Community</h1>
 						</div>
 						<nav className="flex items-center gap-4">
 							<Button variant="ghost" onClick={handleJobsClick}>Jobs</Button>
@@ -128,7 +128,7 @@ const Index = () => {
 						<span className="block text-primary">Job Portal</span>
 					</h1>
 					<p className="text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
-						Connect with fellow CpE alumni, discover career opportunities, and build your professional network in tech industry.
+						Connect with fellow CpE alumni, discover career opportunities.
 					</p>
 					<div className="flex justify-center gap-4">
 						<Button size="lg" className="px-8" onClick={handleBrowseJobsClick}>

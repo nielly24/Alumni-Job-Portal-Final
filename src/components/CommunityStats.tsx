@@ -82,7 +82,7 @@ const CommunityStats = () => {
             <CardContent>
               <p className="text-muted-foreground">Alumni Members</p>
               <p className="text-sm text-muted-foreground mt-1">
-                CpE graduates networking and growing careers
+                CpE graduates
               </p>
             </CardContent>
           </Card>
