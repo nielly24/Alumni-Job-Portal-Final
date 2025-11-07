@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { User, Building, Plus, Edit, Trash2, CalendarIcon, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { format, parseISO } from "date-fns"; // Import parseISO
+import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -95,7 +95,7 @@ const Profile = () => {
       if (profileError && profileError.code === 'PGRST116') {
         const dummyProfile = {
           user_id: userId,
-          id: userId, // Ensure ID matches user_id
+          id: userId, 
           full_name: "Please Update",
           company: "", role: "", bio: ""
         };
@@ -168,10 +168,8 @@ const Profile = () => {
     }
   };
 
-  // --- NEW FUNCTION: To handle clicking the Edit button ---
   const handleEditEmployment = (job: EmploymentHistory) => {
-    setEditingEmployment(job.id); // Set the ID of the item being edited
-    // Populate the form state with the data from the selected job
+    setEditingEmployment(job.id);
     setEmploymentForm({
       company: job.company,
       position: job.position,
@@ -182,12 +180,10 @@ const Profile = () => {
       is_current: job.is_current,
       description: job.description || ""
     });
-    setShowEmploymentDialog(true); // Open the dialog
+    setShowEmploymentDialog(true);
   };
-  // --------------------------------------------------------
 
   const updateEmployment = async (id: string) => {
-    // --- FIX: Validation now uses the populated employmentForm state ---
     if (!user || !employmentForm.company || !employmentForm.position || !employmentForm.start_date) {
       toast({
         title: "Error",
@@ -204,7 +200,7 @@ const Profile = () => {
         employment_type: employmentForm.employment_type,
         location: employmentForm.location || null,
         start_date: format(employmentForm.start_date, 'yyyy-MM-dd'),
-        end_date: employmentForm.is_current ? null : (employmentForm.end_date ? format(employmentForm.end_date, 'yyyy-MM-dd') : null), // Set end_date to null if currently employed
+        end_date: employmentForm.is_current ? null : (employmentForm.end_date ? format(employmentForm.end_date, 'yyyy-MM-dd') : null),
         is_current: employmentForm.is_current,
         description: employmentForm.description || null
       };
@@ -277,7 +273,7 @@ const Profile = () => {
         employment_type: employmentForm.employment_type,
         location: employmentForm.location || null,
         start_date: format(employmentForm.start_date, 'yyyy-MM-dd'),
-        end_date: employmentForm.is_current ? null : (employmentForm.end_date ? format(employmentForm.end_date, 'yyyy-MM-dd') : null), // Set end_date to null if currently employed
+        end_date: employmentForm.is_current ? null : (employmentForm.end_date ? format(employmentForm.end_date, 'yyyy-MM-dd') : null),
         is_current: employmentForm.is_current,
         description: employmentForm.description || null
       };
@@ -321,7 +317,6 @@ const Profile = () => {
     setEditingEmployment(null);
   };
 
-  // --- Helper to format dates ---
   const formatDateDisplay = (dateString: string | null | undefined): string => {
       if (!dateString) return '';
       try {
@@ -370,13 +365,20 @@ const Profile = () => {
                   <CardDescription>Manage your personal and professional details</CardDescription>
                 </div>
               </div>
-              <Button 
-                variant="outline" 
-                onClick={() => setEditingProfile(!editingProfile)}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                {editingProfile ? "Cancel" : "Edit Profile"}
-              </Button>
+              
+              {/* --- THIS IS THE FIX --- */}
+              {/* This button will now ONLY show "Edit Profile" and will disappear when editing */}
+              {!editingProfile && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setEditingProfile(true)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+              )}
+              {/* --------------------- */}
+
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -549,7 +551,7 @@ const Profile = () => {
                           <PopoverTrigger asChild>
                             <Button
                               variant={"outline"}
-                              disabled={employmentForm.is_current} // Disable if currently employed
+                              disabled={employmentForm.is_current}
                               className={cn(
                                 "w-full justify-start text-left font-normal",
                                 !employmentForm.end_date && "text-muted-foreground"
@@ -577,7 +579,7 @@ const Profile = () => {
                         type="checkbox"
                         id="edit-is_current"
                         checked={employmentForm.is_current}
-                        onChange={(e) => setEmploymentForm({ ...employmentForm, is_current: e.target.checked, end_date: e.target.checked ? undefined : employmentForm.end_date })} // Clear end_date if checked
+                        onChange={(e) => setEmploymentForm({ ...employmentForm, is_current: e.target.checked, end_date: e.target.checked ? undefined : employmentForm.end_date })}
                       />
                        <Label htmlFor="edit-is_current">I am currently working in this role</Label>
                     </div>
@@ -628,7 +630,6 @@ const Profile = () => {
                       <div className="flex items-center gap-2">
                         {job.is_current && <Badge variant="secondary">Current</Badge>}
                         <Badge variant="outline">{job.employment_type}</Badge>
-                        {/* --- FIX: Changed DialogTrigger to Button with onClick --- */}
                         <Button variant="ghost" onClick={() => handleEditEmployment(job)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit

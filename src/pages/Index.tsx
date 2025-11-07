@@ -137,7 +137,7 @@ const Index = () => {
 						</Button>
 						<Button size="lg" variant="outline" className="px-8" onClick={handleJoinNetworkClick}>
 							<Users className="mr-2 h-5 w-5" />
-							Join Network
+							Join Community
 						</Button>
 					</div>
 				</div>
